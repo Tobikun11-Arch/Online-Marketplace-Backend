@@ -38,75 +38,59 @@ protectedroute.get('/dashboard', async (req: RequestWithUser, res: Response) => 
 
 
 protectedroute.post('/Products', async (req: RequestWithUser, res: Response) => {
-
     const userId = req.user?._id;
-
     try {
-
-    const { description, productName, images, productPrice,
-        quantity, } = req.body;
-
+    const { description, productName, images, productPrice, category, condition } = req.body;
     const Products = new Product({
         userId,
         productName, 
         description, 
         productPrice,
-        quantity,
+        category,
+        condition,
         images,
     });
 
+    console.log(description, productName, images, productPrice);
+
     await Products.save();
-
     res.status(201).json({ message: 'Product created successfully' });
-
     } 
     
     catch (error) {
-        
         console.error('Error creating product:', error);
         res.status(500).json({ error: 'Internal server error' });
-
     }
-
 });
 
 
 
 
-protectedroute.get('/productList', async  (req: RequestWithUser, res: Response) => {
-
+protectedroute.get('/productList', async (req: RequestWithUser, res: Response) => {
     const userId = req.user?._id;
-
+  
     try {
-        
-        const productList = await productlist.find({ userId: userId })
+      const productList = await productlist.find({ userId: userId });
 
-        if (!productList) {
-            return res.status(404).json({ error: 'product not found' });
-        }
-
-       const ProductLists = productList.map((list) => ({
-
-            productName: list.productName,
-            productPrice: list.productPrice,
-            quantity: list.quantity,
-            images: list.images,
-            description: list.description,
-
-       }))
-
-        res.json({ ProductLists } );
-
+      if (productList.length === 0) {
+        return res.json({ ProductLists: [] });
+      }
+  
+      const ProductLists = productList.map((list) => ({
+        productName: list.productName,
+        productPrice: list.productPrice,
+        images: list.images,
+        description: list.description,
+      }));
+  
+      res.json({ ProductLists });
     } 
-
     catch (error) {
-        
-        console.error('Error fetching user data:', error);
-        res.status(500).json({ error: 'Internal server error' });
-
+      console.error('Error fetching user data:', error);
+      res.status(500).json({ error: 'Internal server error' });
     }
-
-})
+  });
+  
 
 
 
