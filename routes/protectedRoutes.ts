@@ -39,22 +39,42 @@ protectedroute.get('/dashboard', async (req: RequestWithUser, res: Response) => 
 
 protectedroute.post('/Products', async (req: RequestWithUser, res: Response) => {
     const userId = req.user?._id;
+
     try {
-    const { description, productName, images, productPrice, category, condition } = req.body;
+    const { 
+      productName, 
+      productDescription, 
+      productCategory, 
+      productQuality, 
+      productQuantity, 
+      Sku, 
+      productSize,
+      productPrice,
+      productDiscount,
+      productWeight, 
+      images,
+      status
+    } = req.body;
+
     const Products = new Product({
         userId,
         productName, 
-        description, 
+        productDescription, 
+        productCategory, 
+        productQuality, 
+        productQuantity, 
+        Sku, 
+        productSize,
         productPrice,
-        category,
-        condition,
+        productDiscount,
+        productWeight, 
         images,
+        status
     });
 
-    console.log(description, productName, images, productPrice);
-
+    console.log("Products Working")
     await Products.save();
-    res.status(201).json({ message: 'Product created successfully' });
+    res.status(201).json({ message: 'Product successfuly added' });
     } 
     
     catch (error) {
@@ -71,7 +91,7 @@ protectedroute.get('/productList', async (req: RequestWithUser, res: Response) =
   
     try {
       const productList = await productlist.find({ userId: userId });
-
+  
       if (productList.length === 0) {
         return res.json({ ProductLists: [] });
       }
@@ -80,7 +100,7 @@ protectedroute.get('/productList', async (req: RequestWithUser, res: Response) =
         productName: list.productName,
         productPrice: list.productPrice,
         images: list.images,
-        description: list.description,
+        description: list.productDescription,
       }));
   
       res.json({ ProductLists });
