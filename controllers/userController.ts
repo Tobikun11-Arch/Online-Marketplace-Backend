@@ -58,11 +58,15 @@ export const Login = async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Email and Password are required' });
   }
 
+  console.log("working")
+
   try {
     let user = await User('buyer').findOne({ Email: Email.toLowerCase() });
     if(!user) {
       user = await User('seller').findOne({ Email: Email.toLowerCase() });
     }
+    console.log("user: ", user)
+    
 
     if (!user || !(await user.comparePassword(Password))) {
       return res.status(401).json({ error: 'Invalid Email or Password' });
@@ -73,7 +77,19 @@ export const Login = async (req: Request, res: Response) => {
       
       user.refreshToken = refreshToken
       await user.save();
-      res.json({ accessToken, refreshToken });
+      res.cookie('accessToken', accessToken, {
+        httpOnly: true, 
+        secure: process.env.NODE_ENV === 'production', 
+        maxAge: 2 * 60 * 60 * 1000, // 2 hours
+      });
+
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+
+      return res.json({ message: 'Login successful', user });
     }
 
     else if (user.isVerifiedEmail === false) {
@@ -85,7 +101,6 @@ export const Login = async (req: Request, res: Response) => {
     console.error('Error logging in:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
-  
 };
 
 

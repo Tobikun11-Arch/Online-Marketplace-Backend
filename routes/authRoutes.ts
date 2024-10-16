@@ -1,8 +1,7 @@
 import express from 'express';
-import { VerifyRefreshToken, GenerateAccessToken } from '../middleware/AuthenticatedJWT' // Adjust the path as necessary
-import User from '../models/user' // Adjust the path as necessary
+import { VerifyRefreshToken, GenerateAccessToken } from '../middleware/AuthenticatedJWT' 
+import User from '../models/user' 
 import { Request, Response } from "express";
-import { IUser } from '../models/user';
 import { JwtPayload } from 'jsonwebtoken'; 
 
 const router = express.Router();
@@ -25,6 +24,12 @@ router.post('/refresh-token', async (req: Request, res: Response) => {
         }
 
         const accessToken = GenerateAccessToken(user._id.toString());
+
+        res.cookie('accessToken', accessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            maxAge: 2 * 60 * 60 * 1000, // 2 hours
+        });
 
         res.json({ accessToken });
     } catch (error) {
