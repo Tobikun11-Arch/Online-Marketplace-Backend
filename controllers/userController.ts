@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import bcrypt from 'bcrypt'
 import dotenv from "dotenv"
-import { GenerateToken } from '../middleware/AuthenticatedJWT';
+import { GenerateTokens } from '../middleware/AuthenticatedJWT';
 import User from '../models/user';
 const crypto = require('crypto');
 const sendMail = require('../services/sendMail');
@@ -12,6 +12,15 @@ interface RequestWithUser extends Request {
   user?: any;
 }
 
+interface NewUser {
+  FirstName: string;
+  LastName: string;
+  Email: string;
+  Password: string;
+  Role: string;
+  Username: string;
+  emailToken: string;
+}
 
 export const Register = async (req: Request, res: Response) => {
   const { FirstName, LastName, Email, Password, Role, Username } = req.body;
@@ -45,9 +54,9 @@ export const Register = async (req: Request, res: Response) => {
 export const Login = async (req: Request, res: Response) => {
   const { Email, Password } = req.body;
 
-if (!Email || !Password) {
-  return res.status(400).json({ error: 'Email and Password are required' });
-}
+  if (!Email || !Password) {
+    return res.status(400).json({ error: 'Email and Password are required' });
+  }
 
   try {
     let user = await User('buyer').findOne({ Email: Email.toLowerCase() });
@@ -56,13 +65,15 @@ if (!Email || !Password) {
     }
 
     if (!user || !(await user.comparePassword(Password))) {
-      console.log('Invalid attempt');
       return res.status(401).json({ error: 'Invalid Email or Password' });
     }
 
     if (user.isVerifiedEmail === true) {
-      const token = GenerateToken(user._id.toString());
-      res.json({ token, user: { FirstName: user.FirstName, LastName: user.LastName, Email: user.Email, Role: user.Role} });
+      const { accessToken, refreshToken } = GenerateTokens(user._id.toString());
+      
+      user.refreshToken = refreshToken
+      await user.save();
+      res.json({ accessToken, refreshToken });
     }
 
     else if (user.isVerifiedEmail === false) {
@@ -98,5 +109,6 @@ export const Dashboard = async (req: RequestWithUser, res: Response) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
 
 
