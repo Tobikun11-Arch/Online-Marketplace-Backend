@@ -3,11 +3,6 @@ const nodemailer = require('nodemailer');
 const password = process.env.NEXT_PUBLIC_PASSWORD
 const userEmail = process.env.NEXT_PUBLIC_EMAIL
 
-console.table({
-  userEmail,
-  password
-})
-
 const sendMail = async (lowerCaseEmail: string, emailToken: string) => {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -29,8 +24,8 @@ const sendMail = async (lowerCaseEmail: string, emailToken: string) => {
             </p>
             <p>
                 <a href="https://online-marketplace-backend-six.vercel.app/verify/${emailToken}" 
-                   style="background-color: #28a745; color: white; paddin g: 10px 15px; text-decoration: none; border-radius: 5px; display: inline-block;">
-                   Verify Email
+                style="background-color: #28a745; color: white; padding: 10px 15px; text-decoration: none; border-radius: 5px; display: inline-block;">
+                Verify Email
                 </a>
             </p>
             <p style="font-size: 14px; color: #777;">

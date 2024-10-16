@@ -8,6 +8,7 @@ export interface IUser extends Document {
     Email: string;
     Password: string;
     Role: string;
+    Username: string;
     isVerifiedEmail: boolean;
     emailToken?: string;
     comparePassword: (candidatePassword: string) => Promise<boolean>;
@@ -19,15 +20,19 @@ const userSchema = new mongoose.Schema<IUser>({
     Email: { type: String, required: true, unique: true },
     Password: { type: String, required: true },
     Role: { type: String, required: true },
+    Username: { type: String, required: true },
     isVerifiedEmail: { type: Boolean, default: false, required: true},
     emailToken: { type: String, required: false}
-}, { collection: 'Accounts'});
+}, { collection: 'SellerAccounts'});
 
 
 userSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
     return await bcrypt.compare(candidatePassword, this.Password);
 };
 
-const User: Model<IUser> = mongoose.model<IUser>('User', userSchema);
+const User = (role: string): Model<IUser> => {
+    const collectionName = role === 'buyer' ? 'BuyerAccounts' : 'SellerAccounts'
+    return mongoose.model<IUser>('User', userSchema, collectionName)
+}
 
 export default User;

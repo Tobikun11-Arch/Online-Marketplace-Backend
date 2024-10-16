@@ -14,23 +14,27 @@ interface RequestWithUser extends Request {
 
 
 export const Register = async (req: Request, res: Response) => {
-  const { FirstName, LastName, Email, Password, Role } = req.body;
-
-if (!Email || !Password) {
-  return res.status(400).json({ error: 'Email and Password are required' });
-}
-
-const lowerCaseEmail = Email.toLowerCase();
+  const { FirstName, LastName, Email, Password, Role, Username } = req.body;
+  if (!Email || !Password) {
+    return res.status(400).json({ error: 'Email and Password are required' });
+  }
+  const userRole = Role
+  const newUser = User(userRole)
+  const lowerCaseEmail = Email.toLowerCase();
 
   try {
+    const existedBuyer = await User('buyer').findOne({ Email: Email.toLowerCase() })
+    const existedSeller = await User('seller').findOne({ Email: Email.toLowerCase() })
+    if (existedBuyer || existedSeller) {
+      return res.status(400).json({ error: 'Email is already registered' });
+    }
       const HashPassword = await bcrypt.hash(Password, 10);
       const emailToken = crypto.randomBytes(64).toString('hex');
-      const newUser = new User({ FirstName, LastName, Email: lowerCaseEmail, Password: HashPassword, Role, emailToken });
+      const newUsers = new newUser({ FirstName, LastName, Email: lowerCaseEmail, Password: HashPassword, Role, Username, emailToken });
       await sendMail(lowerCaseEmail, emailToken)
-      await newUser.save();
+      await newUsers.save();
       res.status(201).json();
   }
-
   catch (error) {
       console.error('Error registering user:', error);
       res.status(500).json({ message: 'Registration failed' });
@@ -46,36 +50,29 @@ if (!Email || !Password) {
 }
 
   try {
+    let user = await User('buyer').findOne({ Email: Email.toLowerCase() });
+    if(!user) {
+      user = await User('seller').findOne({ Email: Email.toLowerCase() });
+    }
 
-    const user = await User.findOne({ Email: Email.toLowerCase() });
+    if (!user || !(await user.comparePassword(Password))) {
+      console.log('Invalid attempt');
+      return res.status(401).json({ error: 'Invalid Email or Password' });
+    }
 
-      if (!user || !(await user.comparePassword(Password))) {
+    if (user.isVerifiedEmail === true) {
+      const token = GenerateToken(user._id.toString());
+      res.json({ token, user: { FirstName: user.FirstName, LastName: user.LastName, Email: user.Email, Role: user.Role} });
+    }
 
-          console.log('Invalid attempt');
-          return res.status(401).json({ error: 'Invalid Email or Password' });
-
-      }
-
-      if (user.isVerifiedEmail === true) {
-
-        const token = GenerateToken(user._id.toString());
-        res.json({ token, user: { FirstName: user.FirstName, LastName: user.LastName, Email: user.Email, Role: user.Role} });
-
-      }
-    
-      else if (user.isVerifiedEmail === false) {
-
-        return res.status(401).json({ error: 'Invalid Email or Password' });
-
-      }
-
+    else if (user.isVerifiedEmail === false) {
+      return res.status(401).json({ error: 'Invalid Email or Password' });
+    }
   } 
-  
+
   catch (error) {
-
-      console.error('Error logging in:', error);
-      res.status(500).json({ error: 'Internal server error' });
-
+    console.error('Error logging in:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
   
 };
@@ -85,7 +82,7 @@ if (!Email || !Password) {
 
 export const Dashboard = async (req: RequestWithUser, res: Response) => {
     try {
-     
+        
         const user = req.user; 
 
         if (!user) {
