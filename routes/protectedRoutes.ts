@@ -1,5 +1,5 @@
 import express, { Router } from "express";
-import { authMiddleware } from "../middleware/authMiddleware";
+import { authenticateToken } from "../middleware/AuthenticateAccessToken";
 import User from "../models/user"; 
 import productlist from "../models/product"; 
 import Product from "../models/product"; 
@@ -13,7 +13,7 @@ interface RequestWithUser extends Request {
   } 
 
 const protectedroute = Router();
-protectedroute.use(authMiddleware);
+protectedroute.use(authenticateToken);
 
 protectedroute.get('/dashboard', async (req: RequestWithUser, res: Response) => {
     const userEmail = req.user?.Email;
@@ -43,7 +43,7 @@ protectedroute.get('/dashboard', async (req: RequestWithUser, res: Response) => 
 
 protectedroute.post('/Products', async (req: RequestWithUser, res: Response) => {
     const userId = req.user?._id;
-
+    const token = req.cookies['accessToken']; 
     try {
     const {
       productId,
@@ -115,7 +115,7 @@ protectedroute.post('/Products', async (req: RequestWithUser, res: Response) => 
     }
 
     catch (error) {
-      console.error('Error creating product:', error);
+      console.error('Error creating product:', error, token);
       res.status(500).json({ error: 'Internal server error' });
     }
 }); 

@@ -70,9 +70,24 @@ export const Login = async (req: Request, res: Response) => {
 
     if (user.isVerifiedEmail === true) {
       const { accessToken, refreshToken } = GenerateTokens(user._id.toString());
-      
+
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: true,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        sameSite: 'none',
+    });
+    
+    res.cookie('accessToken', accessToken, {
+        httpOnly: true,
+        secure: true,
+        maxAge: 2 * 60 * 60 * 1000,
+        sameSite: 'none',
+    });
+
       user.refreshToken = refreshToken
-      return res.json({ message: 'Login successful', user, accessToken });
+      await user.save();
+      return res.json({ message: 'Login successful', user });
     }
 
     else if (user.isVerifiedEmail === false) {

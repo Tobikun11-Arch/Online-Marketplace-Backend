@@ -9,10 +9,11 @@ export const GenerateRefreshToken = (userId: string) => {
     return jwt.sign({ userId }, REFRESH_JWT_SECRET, {expiresIn: '7d'});
 }
 
+
 export const VerifyAccessToken = (token: string) => {
     try {
         return jwt.verify(token, JWT_SECRET);
-    } catch (error) {
+    } catch (error) {   
         throw new Error("Invalid access token")
     }
 }

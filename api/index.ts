@@ -4,12 +4,13 @@ import connectToMongoDB from '../config/db';
 import express, {Request, Response} from 'express'
 import verificationRoutes from '../routes/verificationRoutes'; 
 import UserRoutes from '../routes/userRoutes'; 
-import authRoute from '../routes/authRoutes'; 
 import cookieParser from 'cookie-parser';
+import { authenticateToken, RefreshToken } from '../middleware/AuthenticateAccessToken';
 
 dotenv.config(); 
 const app = express();
 const cors = require('cors');
+const port = 5000
 
 const corsOptions = {
     origin: ['http://localhost:3000', 'https://online-marketplace-beta.vercel.app'],
@@ -46,5 +47,15 @@ app.use('/', verificationRoutes);
 app.get("/", (req: Request, res: Response) => res.send("Express on Vercelss"));
 app.get("/home", (req: Request, res: Response) => res.send("Gumana tanga"));
 
+app.get('/Authentication', authenticateToken, (req: Request, res: Response) => {
+    return res.json({ verToken: true, message: 'Access token is valid' });
+})
 
+app.post('/AuthenticationRefresh', RefreshToken, (req: Request, res: Response) => {
+    res.status(200).send('Refresh'); // Temporary response
+})
+
+app.listen(port, () => {
+    console.log(`Example app listening on port ${port}`)
+})
 module.exports = app;
