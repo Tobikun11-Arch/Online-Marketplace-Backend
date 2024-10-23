@@ -6,6 +6,7 @@ import verificationRoutes from '../routes/verificationRoutes';
 import UserRoutes from '../routes/userRoutes'; 
 import cookieParser from 'cookie-parser';
 import { authenticateToken, RefreshToken } from '../middleware/AuthenticateAccessToken';
+import { VerifyAccessToken } from '../middleware/AuthenticatedJWT';
 
 dotenv.config(); 
 const app = express();
@@ -55,7 +56,23 @@ app.post('/AuthenticationRefresh', RefreshToken, (req: Request, res: Response) =
     res.status(200).send('Refresh'); // Temporary response
 })
 
+app.post('/Signout', (req: Request, res: Response) => {
+    res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+    });
+
+    res.clearCookie('accessToken',{
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+    });
+
+    res.status(200).json({ message: 'Signed out successfully!' });
+})
+
 app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`)
+    console.log(`This app listening on port ${port}`)
 })
 module.exports = app;
