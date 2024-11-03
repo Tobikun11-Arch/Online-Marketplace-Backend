@@ -177,8 +177,5 @@ protectedroute.get('/productList', async (req: RequestWithUser, res: Response) =
       res.status(500).json({ error: 'Internal server error' });
     }
   });
-  
-
-
 
 export default protectedroute;

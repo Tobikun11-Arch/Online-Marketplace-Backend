@@ -50,7 +50,6 @@ export const Register = async (req: Request, res: Response) => {
   }
 };
 
-
 export const Login = async (req: Request, res: Response) => {
   const { Email, Password } = req.body;
 
@@ -77,7 +76,7 @@ export const Login = async (req: Request, res: Response) => {
         maxAge: 7 * 24 * 60 * 60 * 1000,
         sameSite: 'none',
     });
-    
+
     res.cookie('accessToken', accessToken, {
         httpOnly: true,
         secure: true,
@@ -101,25 +100,23 @@ export const Login = async (req: Request, res: Response) => {
   }
 };
 
+export const CheckUser = async (req: Request, res: Response) => {
+  const { Email } = req.body;
+  try {
+      let user = await User('buyer').findOne({ Email: Email.toLowerCase() });
+      if (user) {
+          return res.json({ Role: 'Buyer' });
+      }
 
-export const Dashboard = async (req: RequestWithUser, res: Response) => {
-    try {
-        
-        const user = req.user; 
+      user = await User('seller').findOne({ Email: Email.toLowerCase() });
+      if (user) {
+          return res.json({ Role: 'Seller' });
+      }
 
-        if (!user) {
-            
-            return res.status(401).json({ error: 'Unauthorized' });
-            
-        }
+      return res.status(404).json({ error: "User not found" });
 
-        // Respond with user data
-        res.json({ message: 'Protected data', user: { Name: user.Name, Email: user.Email} });
-    } catch (error) {
-        console.error('Error fetching dashboard data:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
+  } catch (error) {
+      console.error('Error Checking:', error);
+      return res.status(500).json({ error: "Server error" });
+  }
 };
-
-
-

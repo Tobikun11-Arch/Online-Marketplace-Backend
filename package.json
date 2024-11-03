@@ -4,7 +4,7 @@
   "main": "index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev:api": "ts-node api/index.ts"
+    "dev": "nodemon --watch \"api/**/*.ts\" --exec \"ts-node\" api/index.ts"
   },
   "keywords": [],
   "author": "",
@@ -34,6 +34,7 @@
     "@types/jsonwebtoken": "^9.0.6",
     "@types/mongoose": "^5.11.96",
     "@types/node": "^22.2.0",
+    "nodemon": "^3.0.0",
     "typescript": "^5.5.4"
   }
 }

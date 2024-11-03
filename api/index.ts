@@ -6,7 +6,7 @@ import verificationRoutes from '../routes/verificationRoutes';
 import UserRoutes from '../routes/userRoutes'; 
 import cookieParser from 'cookie-parser';
 import { authenticateToken, RefreshToken } from '../middleware/AuthenticateAccessToken';
-import { VerifyAccessToken } from '../middleware/AuthenticatedJWT';
+import cookie from 'cookie';
 
 dotenv.config(); 
 const app = express();
@@ -14,7 +14,7 @@ const cors = require('cors');
 const port = 5000
 
 const corsOptions = {
-    origin: ['http://localhost:3000', 'https://online-marketplace-beta.vercel.app'],
+    origin: ['http://localhost:3000', 'https://sajuu-bazaar.vercel.app'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true 
