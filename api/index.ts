@@ -46,7 +46,6 @@ app.use('/api', ProtectedRoutes);
 app.use('/', verificationRoutes); 
 
 app.get("/", (req: Request, res: Response) => res.send("Express on Vercelss"));
-app.get("/home", (req: Request, res: Response) => res.send("Gumana tanga"));
 
 app.get('/Authentication', authenticateToken, (req: Request, res: Response) => {
     return res.json({ verToken: true, message: 'Access token is valid' });
@@ -55,7 +54,7 @@ app.get('/Authentication', authenticateToken, (req: Request, res: Response) => {
 app.post('/AuthenticationRefresh', RefreshToken, (req: Request, res: Response) => {
     res.status(200).send('Refresh'); // Temporary response
 })
-
+ 
 app.post('/Signout', (req: Request, res: Response) => {
     res.clearCookie('refreshToken', {
         httpOnly: true,

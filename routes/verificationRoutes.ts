@@ -1,12 +1,11 @@
 import { Router } from "express";
 import User from '../models/user';
-import { useRouter } from "next/navigation";
+
 
 const router = Router();
 
 router.get('/verify/:token', async (req, res) => {
     const { token } = req.params;
-    const routers = useRouter()
 
     try {
       const user = await User('buyer').findOne({ emailToken: token }) || await User('seller').findOne({ emailToken: token });
@@ -25,7 +24,7 @@ router.get('/verify/:token', async (req, res) => {
       user.isVerifiedEmail = true;
       user.emailToken = undefined;
       await user.save();
-      routers.push('/');
+      res.redirect('https://sajuu-bazaar.vercel.app/Client/Verification');
 
     } 
     
