@@ -6,7 +6,6 @@ import verificationRoutes from '../routes/verificationRoutes';
 import UserRoutes from '../routes/userRoutes'; 
 import cookieParser from 'cookie-parser';
 import { authenticateToken, RefreshToken } from '../middleware/AuthenticateAccessToken';
-import cookie from 'cookie';
 
 dotenv.config(); 
 const app = express();
@@ -27,7 +26,6 @@ app.use((req, res, next) => {
     res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
     next();
 });
-
 
 app.use(express.json());
 app.use(cookieParser());
