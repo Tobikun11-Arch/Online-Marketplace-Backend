@@ -1,10 +1,12 @@
 import { Request, Response } from 'express';
 import MainShop from "../models/MainShop";
+import Product from '../models/product';
 
-export const SellerProductlist = async (req: Request, res: Response) => {
+export const ProductList = async (req: Request, res: Response) => {
     try {
-        const product = await MainShop.find({})
-        return res.json({ product })
+        const MainShopProducts = await MainShop.find({})
+        const SellerProducts = await Product.find({})
+        return res.json({ MainShopProducts, SellerProducts })
     } catch (error) {
         console.error(error)
         return res.json({ error })

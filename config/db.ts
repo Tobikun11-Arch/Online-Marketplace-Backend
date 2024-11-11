@@ -1,6 +1,5 @@
 import mongoose, { ConnectOptions } from 'mongoose';
 import dotenv from 'dotenv';
-
 dotenv.config();
 
 // Ensure that MONGO_URI is defined
