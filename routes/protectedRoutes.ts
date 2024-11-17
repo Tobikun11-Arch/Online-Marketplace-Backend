@@ -127,7 +127,7 @@ protectedroute.post('/Products/Delete', async (req: RequestWithUser, res: Respon
     const { productId } = req.body
 
     if (!productId || productId.length === 0) {
-      return res.status(400).json({ message: 'No product IDs provided' });
+      return res.status(400).json({ message: 'No product IDs provided' });  
     }
 
     const result = await Product.deleteMany({ _id: { $in: productId }, userId });
