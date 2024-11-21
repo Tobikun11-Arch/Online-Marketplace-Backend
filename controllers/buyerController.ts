@@ -18,9 +18,25 @@ export const ProductId = async(req: Request, res: Response) => {
     try {
         const product = await Product.findById(productId)
         const mainproduct = await MainShop.findById(productId)
+        let similar: any = []
+
+        if(product?.productCategory || mainproduct?.productCategory) {
+            const category = product?.productCategory || mainproduct?.productCategory
+            const similarproducts = await Product.find({ 
+                productCategory: category,
+                _id: { $ne: productId }
+            })
+
+            const similarmainshop = await MainShop.find({ 
+                productCategory: category,
+                _id: { $ne: productId }
+            })
+
+            similar = [...similarproducts, ...similarmainshop]
+        }
 
         if (product || mainproduct) {
-            return res.json({ product: product || null, mainproduct: mainproduct || null });
+            return res.json({ product: product || null, mainproduct: mainproduct || null, similar: similar || [] });
         } 
 
         else {
