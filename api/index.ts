@@ -58,7 +58,7 @@ app.post('/Signout', (req: Request, res: Response) => {
         httpOnly: true,
         secure: true,
         sameSite: 'none',
-    });
+    }); 
 
     res.clearCookie('accessToken',{
         httpOnly: true,
