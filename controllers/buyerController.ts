@@ -2,6 +2,8 @@ import { Request, Response } from 'express';
 import MainShop from "../models/MainShop";
 import Product from '../models/product';
 import TrendingProduct from '../models/TrendingProduct';
+import User from '../models/user';
+import { Types } from 'mongoose'
 
 export const ProductList = async (req: Request, res: Response) => {
     try {
@@ -14,6 +16,141 @@ export const ProductList = async (req: Request, res: Response) => {
         return res.json({ error })
     }
 }
+
+export const CartProducts = async (req: Request, res: Response) => {
+    const { Email } = req.body;
+    if(!Email) {
+        return res.status(400).json({ error: 'userId is required' })
+    }
+
+    try {
+        const user = await User('buyer').findOne({ Email: Email.toLowerCase() });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found in any collection' });
+        }
+        res.status(200).json({ user })
+
+    } catch (error) {
+        console.error('error finding user ', error)
+    }
+}
+
+export const updateQuantity = async (req: Request, res: Response) => {  //update quantity
+    const { userId, productId, quantity } = req.body;
+    if(!userId || !productId) {
+        return res.status(400).json({ error: 'UserId, ProductId are required' });
+    }
+
+    try {
+        const user = await User('buyer').findById(userId);
+        if(!user) {
+            return res.status(400).json({ error: 'user not found' })
+        }   
+
+        const existingItemIndex = user.cart.findIndex(
+            (item) => item.productId.toString() === productId.toString()
+        );
+
+        if (existingItemIndex > -1) {
+            user.cart[existingItemIndex].quantity = quantity
+        }
+
+        await user.save()
+        res.status(200).json({ message: 'successful updating product!' })
+    } catch (error) {
+        console.error("Error updating quantity: ", error)
+        res.status(500).json({ erorr: "error updating quantity" })
+    }
+}
+
+export const deleteProduct = async (req: Request, res: Response) => { //Delete product
+    const { productId, userId } = req.body
+
+    if(!productId) {
+        res.status(400).json({ error: 'product Id not found' })
+    }
+
+    try {
+        const user = await User('buyer').findById(userId);
+        if(!user) {
+            return res.status(400).json({ error: 'user not found' })
+        }   
+
+        const productExists = user.cart.some((item)=> item.productId.toString() === productId)
+        if(!productExists) {
+            res.status(404).json({ error: 'product not found in user cart' })
+        }
+
+        const updateResult = await User('buyer').updateOne(
+            { _id: userId },
+            { $pull: {cart: { productId } } }
+        )
+
+        res.status(200).json({ message: 'Product successfully removed from cart' })
+    } catch (error) {
+        console.error(error)
+    }
+}
+
+export const Cart = async (req: Request, res: Response) => { //add to cart
+    const { userId, productName, images, productId, quantity} = req.body;
+
+    if (!userId || !productName || !images || !productId || !quantity) {
+        return res.status(400).json({ error: 'UserId, ProductId, and Quantity are required' });
+    }
+
+    try {
+        const product = await Product.findById(productId);
+        const mainproduct = await MainShop.findById(productId);
+        const trendingproduct = await TrendingProduct.findById(productId);
+
+        // Ensure productID is valid
+        const productID = product?._id || mainproduct?._id || trendingproduct?._id;
+
+        if (!productID) {
+            return res.status(404).json({ error: 'Product not found in any collection' });
+        }
+
+        const price =
+            product?.productPrice ||
+            mainproduct?.productPrice ||
+            trendingproduct?.productPrice;
+
+        if (!price) {
+            return res.status(400).json({ error: 'Product price not available' });
+        }
+
+        const cartItem = {
+            productId: productID as Types.ObjectId,
+            productName,
+            images,
+            quantity,
+            price: parseFloat(price),
+            addedAt: new Date(),
+        };
+
+        const user = await User('buyer').findById(userId);
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const existingItemIndex = user.cart.findIndex(
+            (item) => item.productId.toString() === productID.toString()
+        );
+
+        if (existingItemIndex > -1) {
+            user.cart[existingItemIndex].quantity += quantity; //if ung product is already nasa cart magiging +1 nalang
+        } else {
+            user.cart.push(cartItem); //if its not ipupush sa cart
+        }
+
+        await user.save() //save the product
+        res.status(200).json({ message: 'Product added to cart', cart: user.cart });
+    } catch (error) {
+        console.error("Error adding to cart:", error);
+        res.status(500).json({ error: 'Internal Server Error' });
+    }
+};
 
 export const ProductId = async(req: Request, res: Response) => {
     const productId = req.params.id
@@ -46,7 +183,6 @@ export const ProductId = async(req: Request, res: Response) => {
         if (product || mainproduct || trendingproduct) {
             return res.json({ product: product || null, trendingproduct: trendingproduct || null, mainproduct: mainproduct || null, similar: similar || [] });
         } else {
-            console.log("No product")
             return res.json({ error: 'no product found!' })
         }
     } catch (error) {
