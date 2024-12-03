@@ -28,14 +28,15 @@ export const CartProducts = async (req: Request, res: Response) => {
         if (!user) {
             return res.status(404).json({ error: 'User not found in any collection' });
         }
-        res.status(200).json({ user })
+        return res.status(200).json({ user })
 
     } catch (error) {
         console.error('error finding user ', error)
+        return res.status(500).json({ error: 'Internal Server Error' });
     }
 }
 
-export const updateQuantity = async (req: Request, res: Response) => {  //update quantity
+export const updateQuantity = async (req: Request, res: Response) => {  //Update quantity
     const { userId, productId, quantity } = req.body;
     if(!userId || !productId) {
         return res.status(400).json({ error: 'UserId, ProductId are required' });
@@ -67,7 +68,7 @@ export const deleteProduct = async (req: Request, res: Response) => { //Delete p
     const { productId, userId } = req.body
 
     if(!productId) {
-        res.status(400).json({ error: 'product Id not found' })
+        return res.status(400).json({ error: 'product Id not found' })
     }
 
     try {
@@ -78,21 +79,21 @@ export const deleteProduct = async (req: Request, res: Response) => { //Delete p
 
         const productExists = user.cart.some((item)=> item.productId.toString() === productId)
         if(!productExists) {
-            res.status(404).json({ error: 'product not found in user cart' })
+            return res.status(404).json({ error: 'product not found in user cart' })
         }
 
-        const updateResult = await User('buyer').updateOne(
+        await User('buyer').updateOne(
             { _id: userId },
             { $pull: {cart: { productId } } }
         )
 
-        res.status(200).json({ message: 'Product successfully removed from cart' })
+        return res.status(200).json({ message: 'Product successfully removed from cart' })
     } catch (error) {
         console.error(error)
     }
 }
 
-export const Cart = async (req: Request, res: Response) => { //add to cart
+export const Cart = async (req: Request, res: Response) => { //Add to cart
     const { userId, productName, images, productId, quantity} = req.body;
 
     if (!userId || !productName || !images || !productId || !quantity) {
@@ -145,12 +146,12 @@ export const Cart = async (req: Request, res: Response) => { //add to cart
         }
 
         await user.save() //save the product
-        res.status(200).json({ message: 'Product added to cart', cart: user.cart });
+        return res.status(200).json({ message: 'Product added to cart', cart: user.cart });
     } catch (error) {
         console.error("Error adding to cart:", error);
-        res.status(500).json({ error: 'Internal Server Error' });
+        return res.status(500).json({ error: 'Internal Server Error' });
     }
-};
+}
 
 export const ProductId = async(req: Request, res: Response) => {
     const productId = req.params.id
@@ -207,7 +208,7 @@ export const CategoryLength = async(req: Request, res: Response) => {
         })
     } catch (error) {
         console.error("Error fetching categories: ", error)
-        res.status(500).json({
+        return res.status(500).json({
             message: 'an error occured while fetching'
         })
     }
