@@ -23,7 +23,7 @@ interface NewUser {
 }
 
 export const Register = async (req: Request, res: Response) => {
-  const { FirstName, LastName, Email, Password, Role, Username } = req.body;
+  const { FirstName, LastName, PhoneNumber, PetName, Email, Password, Role, Username } = req.body;
   if (!Email || !Password) {
     return res.status(400).json({ error: 'Email and Password are required' });
   }
@@ -39,7 +39,7 @@ export const Register = async (req: Request, res: Response) => {
     }
       const HashPassword = await bcrypt.hash(Password, 10);
       const emailToken = crypto.randomBytes(64).toString('hex');
-      const newUsers = new newUser({ FirstName, LastName, Email: lowerCaseEmail, Password: HashPassword, Role, Username, emailToken });
+      const newUsers = new newUser({ FirstName, LastName, PhoneNumber, PetName, Email: lowerCaseEmail, Password: HashPassword, Role, Username, emailToken });
       await sendMail(lowerCaseEmail, emailToken)
       await newUsers.save();
       res.status(201).json();

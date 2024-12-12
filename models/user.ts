@@ -24,6 +24,8 @@ export interface IUser extends Document {
     _id: Types.ObjectId;
     FirstName: string;
     LastName: string;
+    PhoneNumber: string;
+    PetName: string;
     Email: string;
     Password: string;
     Role: 'buyer' | 'seller'; // Restrict to predefined roles
@@ -58,6 +60,8 @@ const OrderSchema = new Schema<IOrder>({
 const userSchema = new Schema<IUser>({
     FirstName: { type: String, required: true },
     LastName: { type: String, required: true },
+    PhoneNumber: { type: String, required: true },
+    PetName: { type: String, required: true },
     Email: { type: String, required: true, unique: true },
     Password: { type: String, required: true },
     Role: { type: String, enum: ['buyer', 'seller'], required: true },

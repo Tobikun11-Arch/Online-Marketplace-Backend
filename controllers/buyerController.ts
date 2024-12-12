@@ -213,3 +213,35 @@ export const CategoryLength = async(req: Request, res: Response) => {
         })
     }
 }
+
+export const UpdateProfile = async(req: Request, res: Response) => {
+    const { userId, FirstName, LastName, PhoneNumber, PetName, Email, Username } = req.body;
+
+    try {
+        const modifiedData = await User('buyer').updateOne(
+            { _id: userId },
+            {
+                $set: {
+                    FirstName: FirstName, 
+                    LastName: LastName, 
+                    PhoneNumber: PhoneNumber,
+                    PetName: PetName,
+                    Email: Email,
+                    Username: Username,
+                    updatedAt: new Date() 
+                }
+            }
+        )
+
+        if(modifiedData.modifiedCount > 0) {
+            res.status(200).json({ message: "Update successfully" })
+        }
+
+        else{
+            res.status(404).json({ message: "user not found" })
+        }
+    } 
+    catch (error) {
+        console.error("Failed to update: ", error)
+    }
+}
