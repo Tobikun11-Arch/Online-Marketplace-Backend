@@ -198,8 +198,7 @@ export const CategoryLength = async(req: Request, res: Response) => {
 
         for (const category of categories) {
             const productCategory = await Product.find({ productCategory: category })
-            const mainshopCategory = await MainShop.find({ productCategory: category })
-            results[category] = [...productCategory, ...mainshopCategory]
+            results[category] = productCategory
         }
 
         res.status(200).json({
