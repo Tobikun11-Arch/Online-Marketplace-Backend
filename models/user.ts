@@ -30,6 +30,7 @@ export interface IUser extends Document {
     Password: string;
     Role: 'buyer' | 'seller'; // Restrict to predefined roles
     Username: string;
+    SearchData: string[];
     isVerifiedEmail: boolean;
     emailToken?: string;
     refreshToken?: string;
@@ -37,6 +38,7 @@ export interface IUser extends Document {
     cart: ICartItem[];
     orders: IOrder[];
 }
+
 
 const CartItemSchema = new Schema<ICartItem>({
     productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
@@ -57,6 +59,7 @@ const OrderSchema = new Schema<IOrder>({
     cancellationReason: { type: String },
 });
 
+
 const userSchema = new Schema<IUser>({
     FirstName: { type: String, required: true },
     LastName: { type: String, required: true },
@@ -66,12 +69,14 @@ const userSchema = new Schema<IUser>({
     Password: { type: String, required: true },
     Role: { type: String, enum: ['buyer', 'seller'], required: true },
     Username: { type: String, required: true },
+    SearchData: { type: [String], required: false },
     isVerifiedEmail: { type: Boolean, default: false },
     emailToken: { type: String },
     refreshToken: { type: String },
     cart: { type: [CartItemSchema], default: [] },
     orders: { type: [OrderSchema], default: [] },
 }, { collection: 'SellerAccounts', timestamps: true });
+
 
 userSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
     return await bcrypt.compare(candidatePassword, this.Password);

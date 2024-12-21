@@ -206,7 +206,6 @@ export const CategoryLength = async(req: Request, res: Response) => {
             categories: results
         })
     } catch (error) {
-        console.error("Error fetching categories: ", error)
         return res.status(500).json({
             message: 'an error occured while fetching'
         })
@@ -221,22 +220,19 @@ export const UpdateProfile = async(req: Request, res: Response) => {
             { _id: userId },
             {
                 $set: {
-                    FirstName: FirstName, 
-                    LastName: LastName, 
+                    FirstName: FirstName,
+                    LastName: LastName,
                     PhoneNumber: PhoneNumber,
                     PetName: PetName,
                     Email: Email,
                     Username: Username,
-                    updatedAt: new Date() 
+                    updatedAt: new Date()
                 }
             }
         )
-
         if(modifiedData.modifiedCount > 0) {
             res.status(200).json({ message: "Update successfully" })
-        }
-
-        else{
+        } else{
             res.status(404).json({ message: "user not found" })
         }
     } 
