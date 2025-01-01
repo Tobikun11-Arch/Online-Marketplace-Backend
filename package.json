@@ -23,6 +23,7 @@
     "mongoose": "^8.5.2",
     "nodemailer": "^6.9.14",
     "online-marketplace-backend": "file:",
+    "stripe": "^17.5.0",
     "ts-node": "^10.9.2"
   },
   "devDependencies": {
