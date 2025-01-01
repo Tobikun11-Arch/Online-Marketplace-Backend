@@ -24,7 +24,7 @@ router.get('/verify/:token', async (req, res) => {
       user.isVerifiedEmail = true;
       user.emailToken = undefined;
       await user.save();
-      res.redirect('https://sajuu-bazaar.vercel.app/Client/Verification');
+      res.redirect('https://online-marketplace-xi.vercel.app//Client/Verification');
 
     } 
     
