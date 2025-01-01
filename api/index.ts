@@ -13,7 +13,7 @@ const cors = require('cors');
 const port = 5000
 
 const corsOptions = {
-    origin: ['http://localhost:3000', 'https://online-marketplace-xi.vercel.app'],
+    origin: ['http://localhost:3000', 'https://sajuu-bazaar.vercel.app'],
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true 
