@@ -11,12 +11,12 @@ export interface ICartItem {
 }
 
 export interface IOrder {
-    orderId: string;
+    orderId: Types.ObjectId;
     items: ICartItem[];
     totalAmount: number;
     status: 'purchased' | 'cancelled';
     createdAt: Date;
-    updatedAt: Date;
+    updatedAt?: Date;
     cancellationReason?: string;
 }
 
@@ -50,7 +50,7 @@ const CartItemSchema = new Schema<ICartItem>({
 });
 
 const OrderSchema = new Schema<IOrder>({
-    orderId: { type: String, required: true },
+    orderId: { type: mongoose.Schema.Types.ObjectId, required: true },
     items: { type: [CartItemSchema], required: true },
     totalAmount: { type: Number, required: true },
     status: { type: String, enum: ['purchased', 'cancelled'], required: true },

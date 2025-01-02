@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { Register, Login, CheckUser } from "../controllers/userController";
 import { ProductList, ProductId, CategoryLength, Cart, CartProducts, updateQuantity, deleteProduct, UpdateProfile } from "../controllers/buyerController";
-import { SearchList, StripePayment } from "../user/userDataHandler"
+import { SearchList, StripePayment, Orders } from "../user/userDataHandler"
 const router = Router();
 
 router.post('/register', Register);
@@ -12,6 +12,7 @@ router.get('/product/length', CategoryLength)
 router.post('/product/cartProducts', CartProducts)
 router.put('/searchProduct', SearchList)
 router.post('/StripePayment', StripePayment)
+router.put('/Orders', Orders)
 router.put('/product/updateQuantity', updateQuantity)
 router.put('/UpdateProfile', UpdateProfile)
 router.delete('/product/deleteProduct', deleteProduct)
