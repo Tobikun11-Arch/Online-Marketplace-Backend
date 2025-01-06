@@ -38,15 +38,24 @@ export const Register = async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Email is already registered' });
     }
       const HashPassword = await bcrypt.hash(Password, 10);
-      const emailToken = crypto.randomBytes(64).toString('hex');
-      const newUsers = new newUser({ FirstName, LastName, PhoneNumber, PetName, Email: lowerCaseEmail, Password: HashPassword, Role, Username, emailToken });
-      await sendMail(lowerCaseEmail, emailToken)
-      await newUsers.save();
-      res.status(201).json();
+      if(FirstName === "First Name") {
+        const emailToken = crypto.randomBytes(64).toString('hex');
+        await sendMail(lowerCaseEmail, emailToken)
+        const newUsers = new newUser({ FirstName, LastName, PhoneNumber, PetName, Email: lowerCaseEmail, Password: HashPassword, Role, Username, emailToken });
+        await newUsers.save();
+        res.status(201).json({
+          success: true,
+          message: "User created successfully"
+        });
+      } else {
+        const newUsers = new newUser({ FirstName, LastName, PhoneNumber, PetName, Email: lowerCaseEmail, Password: HashPassword, Role, Username, isVerifiedEmail: true });
+        await newUsers.save();
+        res.status(201).json();
+      }
   }
   catch (error) {
       console.error('Error registering user:', error);      
-      res.status(500).json({ message: 'Registration failed' });
+      res.status(500).json({ message: 'Registration failed',  success: false });
   }
 };
 

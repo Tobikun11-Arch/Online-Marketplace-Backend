@@ -6,4 +6,7 @@ export interface product_types_stripe {
     price: number;
     quantity: number
     productId?: Types.ObjectId;
+    _id?: Types.ObjectId;
+    productPrice: number;
+    productQuantity: number;
 }

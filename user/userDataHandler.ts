@@ -59,7 +59,7 @@ export const StripePayment = async (req: Request, res: Response) => {
         }
         if(user_exist) {
            if(products) { //if products exist
-                const productId = products.map((product) => product.productId) 
+                const productId = products.map((product) => product.productId || product._id)
                 const LineItems = products.map((product) => ({
                     price_data: {
                         currency: 'usd',
@@ -67,9 +67,9 @@ export const StripePayment = async (req: Request, res: Response) => {
                             name: product.productName,
                             images: [product.images[0]],
                         },
-                        unit_amount: product.price * 100,
+                        unit_amount: Number(product.price) || Number(product.productPrice) * 100, 
                     },
-                    quantity: product.quantity,
+                    quantity: Number(product.quantity) || 1,
                 }))
                 const session = await stripe.checkout.sessions.create({
                     payment_method_types: ['card'],
@@ -109,7 +109,14 @@ export const Orders = async (req: Request, res: Response) => {
                         }
                     }
                 )
-                if (productCart && productCart.cart.length > 0) {
+
+                const products = await Product.findOne(
+                    {
+                        _id: cartProducts
+                    }
+                )
+
+                if (productCart && productCart.cart.length > 0 ) {
                     const newOrder = productCart?.cart.map(cart => ({
                         productId: cart.productId,
                         productName: cart.productName,
@@ -149,6 +156,36 @@ export const Orders = async (req: Request, res: Response) => {
                     if(remove_cart.modifiedCount > 0 && add_order.modifiedCount > 0) {
                         return res.status(200).json({ message: "Update success" })
                     }
+                } else {
+                    const Items = {
+                        productId: products?._id,
+                        productName: products?.productName,
+                        images: products?.images,
+                        quantity: products?.productQuantity,
+                        price: products?.productPrice
+                    }
+
+                    const order = {
+                        orderId: new Types.ObjectId(),
+                        items: Items,
+                        totalAmount: 0,
+                        status: 'purchased', 
+                        createdAt: new Date(),
+                    }
+
+                    const add_order = await User('buyer').updateOne(
+                        {
+                            _id: userId
+                        }, {
+                            $push: {
+                                orders: order
+                            }
+                        }
+                    )
+
+                    if(add_order.modifiedCount > 0) {
+                        return res.status(200).json({ message: "Update success" })
+                    }
                 }
             }
         }
@@ -161,27 +198,28 @@ export const Orders = async (req: Request, res: Response) => {
     
 }
 
+export const getOrderHistory = async (req: Request, res: Response) => {
+    const { userId } = req.query
 
+    try {
+        const user_exist = await User('buyer').findById(userId)
+        if(!user_exist) {
+            return res.status(404).json({ message: "User not found" })
+        } else {
+            const getData = await User('buyer').findOne(
+                { _id: userId }, 
+                { orders: 1 }
+            )
 
-
-  // const push_orders = await User('buyer').updateOne(
-                //     {
-                //         _id: userId
-                //     }, {
-                //         $push: {
-                //             orders: cartProducts
-                //         }
-                //     }
-                // )
-                // const remove_cart = await User('buyer').updateOne(
-                //     {
-                //         _id: userId
-                //     }, {
-                //         $pull: {
-                //             cart: cartProducts
-                //         }
-                //     }
-                // )
-                // if(push_orders.modifiedCount > 0 && remove_cart.modifiedCount > 0 ){
-                //     return res.status(200).json({ message: "new order added and remove from cart" })
-                // }
+            const Order_Items = getData?.orders.flatMap(order => order.items)
+            if(!Order_Items) {
+                return res.status(404).json({ message: "No Items found" })
+            } else {
+                return res.status(200).json({ Order_Items })
+            }
+        }
+    } catch (error) {
+        console.error("failed to get: ", error)
+        return res.status(500).json({ message: "Internal Server Error" })
+    }
+}
