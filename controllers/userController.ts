@@ -28,7 +28,9 @@ export const Register = async (req: Request, res: Response) => {
     return res.status(400).json({ error: 'Email and Password are required' });
   }
   const userRole = Role
-  const newUser = User(userRole)
+  const newUser = User(userRole)  
+
+
   const lowerCaseEmail = Email.toLowerCase();
 
   try {
@@ -50,7 +52,7 @@ export const Register = async (req: Request, res: Response) => {
       } else {
         const newUsers = new newUser({ FirstName, LastName, PhoneNumber, PetName, Email: lowerCaseEmail, Password: HashPassword, Role, Username, isVerifiedEmail: true });
         await newUsers.save();
-        res.status(201).json();
+        res.status(201).json({ message: "success register(socmed)" });
       }
   }
   catch (error) {
