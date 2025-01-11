@@ -8,10 +8,10 @@ interface RequestWithUser extends Request {
 
 export const authenticateToken = (req: RequestWithUser, res: Response, next: NextFunction) => {
     const token = req.cookies['accessToken']; 
+    console.log("Access Token: ", token)
     if (!token) {
         return res.status(401).json({ error: 'Access token is missing', verToken: false });
     }
-
     try {
         const verifiedToken = VerifyAccessToken(token); // Verify the token
         req.user = verifiedToken; 

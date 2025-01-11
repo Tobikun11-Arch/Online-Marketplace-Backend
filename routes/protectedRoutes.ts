@@ -42,7 +42,26 @@ protectedroute.get('/dashboard', async (req: RequestWithUser, res: Response) => 
 
 
   protectedroute.post('/UploadProducts', async (req:RequestWithUser, res: Response) => {
-    // const {}
+    const token = req.cookies['accessToken']; 
+    try {
+      const {
+        userId,
+        productName,
+        productDescription,
+        productCategory,
+        Sku,
+        productPrice,
+        productStock,
+        productDiscount,
+        productQuality,
+        productSize,
+        images,
+      } = req.body
+      console.log(userId)
+    } catch (error) {
+      console.error(error)
+      res.status(500).json({ error: 'Internal server error', messsage: `this is the token: ${token}` });
+    }
   })
 
 protectedroute.post('/Products', async (req: RequestWithUser, res: Response) => {
