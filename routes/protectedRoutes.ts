@@ -72,7 +72,7 @@ protectedroute.post('/UploadProducts', async (req:RequestWithUser, res: Response
         }
 
         const result = await User('seller').updateOne(
-          userId,
+          { _id: userId },
           { $addToSet: { sellerProducts: sellerProducts } }
         )
 
