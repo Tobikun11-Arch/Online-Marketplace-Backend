@@ -69,7 +69,7 @@ export const Login = async (req: Request, res: Response) => {
 
   try {
     let user = await User('buyer').findOne({ Email: Email.toLowerCase() });
-    if(!user) {
+    if(!user) { 
       user = await User('seller').findOne({ Email: Email.toLowerCase() });
     }
 
