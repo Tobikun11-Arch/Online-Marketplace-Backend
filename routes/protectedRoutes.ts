@@ -41,6 +41,10 @@ protectedroute.get('/dashboard', async (req: RequestWithUser, res: Response) => 
 });
 
 
+  protectedroute.post('/UploadProducts', async (req:RequestWithUser, res: Response) => {
+    const {}
+  })
+
 protectedroute.post('/Products', async (req: RequestWithUser, res: Response) => {
     const userId = req.user?._id;
     const token = req.cookies['accessToken']; 

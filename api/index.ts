@@ -52,7 +52,7 @@ app.get('/Authentication', authenticateToken, (req: Request, res: Response) => {
 app.post('/AuthenticationRefresh', RefreshToken, (req: Request, res: Response) => {
     res.status(200).send('Refresh'); 
 })
- 
+
 app.post('/Signout', (req: Request, res: Response) => {
     res.clearCookie('refreshToken', {
         httpOnly: true,

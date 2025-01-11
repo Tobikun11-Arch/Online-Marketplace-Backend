@@ -30,7 +30,6 @@ export const Register = async (req: Request, res: Response) => {
   const userRole = Role
   const newUser = User(userRole)  
 
-
   const lowerCaseEmail = Email.toLowerCase();
 
   try {

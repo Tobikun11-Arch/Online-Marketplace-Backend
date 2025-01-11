@@ -1,24 +1,9 @@
-import mongoose, { Document, Model, Schema, Types } from 'mongoose';
+import mongoose, { Document, Model, Types } from 'mongoose';
 import bcrypt from 'bcrypt';
-
-export interface ICartItem {
-    productId: Types.ObjectId;
-    productName: string
-    images: string[];
-    quantity: number;
-    price: number;
-    addedAt: Date;
-}
-
-export interface IOrder {
-    orderId: Types.ObjectId;
-    items: ICartItem[];
-    totalAmount: number;
-    status: 'purchased' | 'cancelled';
-    createdAt: Date;
-    updatedAt?: Date;
-    cancellationReason?: string;
-}
+import { IOrder, ICartItem } from './Interface/BuyerInterface'
+import { ISellerProducts, IDraftProducts } from './Interface/SellerInterface'
+import { buyerSchema } from './Schemas/BuyerSchema'
+import { sellerSchema } from './Schemas/SellerSchema'
 
 export interface IUser extends Document {
     _id: Types.ObjectId;
@@ -37,55 +22,23 @@ export interface IUser extends Document {
     comparePassword: (candidatePassword: string) => Promise<boolean>;
     cart: ICartItem[];
     orders: IOrder[];
+    sellerProducts: ISellerProducts[]
+    draftProducts: IDraftProducts[]
 }
 
 
-const CartItemSchema = new Schema<ICartItem>({
-    productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product', required: true },
-    productName: { type: String, required: true },
-    images: { type: [String], required: true },
-    quantity: { type: Number, required: true },
-    price: { type: Number, required: true },
-    addedAt: { type: Date, default: Date.now },
-});
-
-const OrderSchema = new Schema<IOrder>({
-    orderId: { type: mongoose.Schema.Types.ObjectId, required: true },
-    items: { type: [CartItemSchema], required: true },
-    totalAmount: { type: Number, required: true },
-    status: { type: String, enum: ['purchased', 'cancelled'], required: true },
-    createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date },
-    cancellationReason: { type: String },
-});
-
-
-const userSchema = new Schema<IUser>({
-    FirstName: { type: String, required: true },
-    LastName: { type: String, required: true },
-    PhoneNumber: { type: String, required: true },
-    PetName: { type: String, required: true },
-    Email: { type: String, required: true, unique: true },
-    Password: { type: String, required: true },
-    Role: { type: String, enum: ['buyer', 'seller'], required: true },
-    Username: { type: String, required: true },
-    SearchData: { type: [String], required: false },
-    isVerifiedEmail: { type: Boolean, default: false },
-    emailToken: { type: String },
-    refreshToken: { type: String },
-    cart: { type: [CartItemSchema], default: [] },
-    orders: { type: [OrderSchema], default: [] },
-}, { collection: 'SellerAccounts', timestamps: true });
-
-
-userSchema.methods.comparePassword = async function (candidatePassword: string): Promise<boolean> {
+const comparePassword = async function (this: IUser, candidatePassword: string): Promise<boolean> {
     return await bcrypt.compare(candidatePassword, this.Password);
 };
+
+buyerSchema.methods.comparePassword = comparePassword;
+sellerSchema.methods.comparePassword = comparePassword;
 
 // Dynamic user model function
 const User = (role: 'buyer' | 'seller'): Model<IUser> => {
     const collectionName = role === 'buyer' ? 'BuyerAccounts' : 'SellerAccounts';
-    return mongoose.model<IUser>('User', userSchema, collectionName);
+    const schema = role === 'buyer' ? buyerSchema : sellerSchema;
+    return mongoose.model<IUser>('User', schema, collectionName);
 };
 
 export default User;
