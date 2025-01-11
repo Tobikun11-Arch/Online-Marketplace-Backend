@@ -34,11 +34,23 @@ const comparePassword = async function (this: IUser, candidatePassword: string):
 buyerSchema.methods.comparePassword = comparePassword;
 sellerSchema.methods.comparePassword = comparePassword;
 
+const modelCache: { [key: string]: Model<IUser> } = {};
+
 // Dynamic user model function
 const User = (role: 'buyer' | 'seller'): Model<IUser> => {
     const collectionName = role === 'buyer' ? 'BuyerAccounts' : 'SellerAccounts';
     const schema = role === 'buyer' ? buyerSchema : sellerSchema;
-    return mongoose.model<IUser>('User', schema, collectionName);
+
+    // Check if the model is already cached
+    if (modelCache[collectionName]) {
+        return modelCache[collectionName];
+    }
+
+    // Create and cache the model
+    const model = mongoose.model<IUser>('User', schema, collectionName);
+    modelCache[collectionName] = model;
+
+    return model;
 };
 
 export default User;
