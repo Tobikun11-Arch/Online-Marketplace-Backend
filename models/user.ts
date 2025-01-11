@@ -38,19 +38,22 @@ const modelCache: { [key: string]: Model<IUser> } = {};
 
 // Dynamic user model function
 const User = (role: 'buyer' | 'seller'): Model<IUser> => {
-    const collectionName = role === 'buyer' ? 'Buyer_Accounts' : 'Seller_Accounts';
-    const schema = role === 'buyer' ? buyerSchema : sellerSchema;
+  const collectionName = role === 'buyer' ? 'Buyer_Accounts' : 'Seller_Accounts';
+  const schema = role === 'buyer' ? buyerSchema : sellerSchema;
 
-    // Check if the model is already cached
-    if (modelCache[collectionName]) {
-        return modelCache[collectionName];
-    }
+  // Generate a unique model name based on the role
+  const modelName = `User_${role}`; // e.g., 'User_buyer' or 'User_seller'
 
-    // Create and cache the model
-    const model = mongoose.model<IUser>('User', schema, collectionName);
-    modelCache[collectionName] = model;
+  // Check if the model is already cached
+  if (modelCache[modelName]) {
+    return modelCache[modelName];
+  }
 
-    return model;
+  // Create and cache the model
+  const model = mongoose.model<IUser>(modelName, schema, collectionName);
+  modelCache[modelName] = model;
+
+  return model;
 };
 
 export default User;
