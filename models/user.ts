@@ -38,7 +38,7 @@ const modelCache: { [key: string]: Model<IUser> } = {};
 
 // Dynamic user model function
 const User = (role: 'buyer' | 'seller'): Model<IUser> => {
-    const collectionName = role === 'buyer' ? 'BuyerAccounts' : 'SellerAccounts';
+    const collectionName = role === 'buyer' ? 'Buyer_Accounts' : 'Seller_Accounts';
     const schema = role === 'buyer' ? buyerSchema : sellerSchema;
 
     // Check if the model is already cached
