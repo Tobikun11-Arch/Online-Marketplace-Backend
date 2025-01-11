@@ -41,27 +41,54 @@ protectedroute.get('/dashboard', async (req: RequestWithUser, res: Response) => 
 });
 
 
-  protectedroute.post('/UploadProducts', async (req:RequestWithUser, res: Response) => {
+protectedroute.post('/UploadProducts', async (req:RequestWithUser, res: Response) => {
     try {
-      const {
-        userId,
-        productName,
-        productDescription,
-        productCategory,
-        Sku,
-        productPrice,
-        productStock,
-        productDiscount,
-        productQuality,
-        productSize,
-        images,
-      } = req.body
-      return res.status(200).json({ messsage: userId })
+        const {
+          userId,
+          productName,
+          productDescription,
+          productCategory,
+          Sku,
+          productPrice,
+          productStock,
+          productDiscount,
+          productQuality,
+          productSize,
+          images,
+        } = req.body
+        if(!userId) { return res.status(404).json({ message: "userId not found" }) }
+
+        const sellerProducts = {
+          productName,
+          productDescription,
+          productCategory,
+          Sku,
+          productPrice,
+          productStock,
+          productDiscount,
+          productQuality,
+          productSize,
+          images
+        }
+
+        const result = await User('seller').updateOne(
+          userId,
+          { $addToSet: { sellerProducts: sellerProducts } }
+        )
+
+        if(result.modifiedCount > 0) {
+          return res.status(200).json({ message: "Successfully added" })
+        }
+
+        else{
+          return res.status(400).json({ messsage: "Failed to add" })
+        }
+
     } catch (error) {
       console.error(error)
       res.status(500).json({ error: 'Internal server error'});
     }
-  })
+})
 
 protectedroute.post('/Products', async (req: RequestWithUser, res: Response) => {
     const userId = req.user?._id;
