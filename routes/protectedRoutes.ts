@@ -42,7 +42,6 @@ protectedroute.get('/dashboard', async (req: RequestWithUser, res: Response) => 
 
 
   protectedroute.post('/UploadProducts', async (req:RequestWithUser, res: Response) => {
-    const token = req.cookies['accessToken']; 
     try {
       const {
         userId,
@@ -57,10 +56,10 @@ protectedroute.get('/dashboard', async (req: RequestWithUser, res: Response) => 
         productSize,
         images,
       } = req.body
-      console.log(userId)
+      return res.status(200).json({ messsage: userId })
     } catch (error) {
       console.error(error)
-      res.status(500).json({ error: 'Internal server error', messsage: `this is the token: ${token}` });
+      res.status(500).json({ error: 'Internal server error'});
     }
   })
 
