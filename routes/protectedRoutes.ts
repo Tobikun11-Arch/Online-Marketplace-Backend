@@ -41,7 +41,7 @@ protectedroute.get('/dashboard', async (req: RequestWithUser, res: Response) => 
 });
 
 
-protectedroute.post('/UploadProducts', async (req:RequestWithUser, res: Response) => {
+protectedroute.post('/seller', async (req:RequestWithUser, res: Response) => {
     try {
         const {
           userId,
