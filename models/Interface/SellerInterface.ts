@@ -1,6 +1,7 @@
 import { Types } from 'mongoose';
 
 export interface ISellerProducts {
+    productId: Types.ObjectId;
     productName: string;
     status: string;
     productDescription: string;
@@ -17,6 +18,7 @@ export interface ISellerProducts {
 }
 
 export interface IDraftProducts {
+    productId: Types.ObjectId;
     productName: string;
     publication_status: string;
     status: string;

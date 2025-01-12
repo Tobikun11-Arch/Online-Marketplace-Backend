@@ -3,6 +3,7 @@ import { ISellerProducts, IDraftProducts } from '../Interface/SellerInterface'
 import { IUser } from '../user'
 
 const SellerProducts = new Schema<ISellerProducts>({
+    productId: { type: mongoose.Schema.Types.ObjectId, required: true },
     productName: { type: String, required: true },
     status: { type: String, required: true },
     productDescription: { type: String, required: true },
@@ -19,6 +20,7 @@ const SellerProducts = new Schema<ISellerProducts>({
 })
 
 const DraftProducts = new Schema<IDraftProducts>({
+    productId: { type: mongoose.Schema.Types.ObjectId, required: true },
     productName: { type: String, required: false, default: 'Untitled Product' },
     status: { type: String, required: false, default: 'draft' },
     productDescription: { type: String, required: false, default: '' },
