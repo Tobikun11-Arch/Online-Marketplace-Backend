@@ -36,4 +36,4 @@ export const buyerSchema = new Schema<IUser>({
     refreshToken: { type: String },
     cart: { type: [CartItemSchema], default: [] }, // Only for buyers
     orders: { type: [OrderSchema], default: [] }, // Only for buyers
-}, { collection: 'BuyerAccounts', timestamps: true });
+}, { collection: 'Buyer_Accounts', timestamps: true });

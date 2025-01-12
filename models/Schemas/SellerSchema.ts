@@ -51,4 +51,4 @@ export const sellerSchema = new Schema<IUser>({
     refreshToken: { type: String },
     sellerProducts: { type: [SellerProducts], default: [] }, // Only for sellers
     draftProducts: { type: [DraftProducts], default: [] },
-}, { collection: 'SellerAccounts', timestamps: true });
+}, { collection: 'Seller_Accounts', timestamps: true });
