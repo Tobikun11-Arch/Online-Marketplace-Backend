@@ -1,6 +1,4 @@
 import { Request, Response } from 'express';
-import MainShop from "../models/MainShop";
-import Product from '../models/product';
 import TrendingProduct from '../models/TrendingProduct';
 import User from '../models/user';
 import { Types } from 'mongoose'
@@ -18,5 +16,40 @@ export const Get_Product = async (req: Request, res: Response) => {
     } catch (error) {
         console.log(error)
         return res.status(500).json({ message: 'Internal server error' })
+    }
+}
+
+export const Update_Product = async (req: Request, res: Response) => {
+    try {
+        const {
+            userId,
+            productId,
+            productName,
+            productDescription,
+            productCategory,
+            status,
+            Sku,
+            productPrice,
+            productStock,
+            productDiscount,
+            productQuality,
+            productSize,
+            images
+        } = req.body
+
+        const user = await User('seller').findById(userId)
+        if(!user) {
+            return res.status(404).json({ message: "User not found" })
+        }
+
+        if(user) {
+            const update_product = user.sellerProducts.findIndex(
+                productIndex => productIndex._id.toString() === productId
+            )
+
+            console.log("Product id match: ", update_product)
+        }
+    } catch (error) {
+        console.error("Error: ", error)
     }
 }

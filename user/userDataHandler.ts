@@ -52,6 +52,7 @@ export const SearchList = async (req: Request, res: Response) => {
 
 export const StripePayment = async (req: Request, res: Response) => {
     const { products, userId }: { products: product_types_stripe[]; userId: string } = req.body
+    console.log("Products: ", products)
     try {
         const user_exist = await User('buyer').findById(userId)
         if (!user_exist) {
@@ -60,17 +61,25 @@ export const StripePayment = async (req: Request, res: Response) => {
         if(user_exist) {
            if(products) { //if products exist
                 const productId = products.map((product) => product.productId || product._id)
-                const LineItems = products.map((product) => ({
-                    price_data: {
-                        currency: 'usd',
-                        product_data: {
-                            name: product.productName,
-                            images: [product.images[0]],
+                console.log("Product id: ", productId)
+                const LineItems = products.map((product) => {
+                    // Use product.price if it exists, otherwise fall back to product.productPrice
+                    const price = Number(product.price) || Number(product.productPrice);
+                    const unitAmount = Math.round(price * 100); // Convert to cents
+                    console.log(`Product: ${product.productName}, Unit Amount: ${unitAmount}, Quantity: ${product.quantity}`);
+                    return {
+                        price_data: {
+                            currency: 'usd',
+                            product_data: {
+                                name: product.productName,
+                                images: [product.images[0]],
+                            },
+                            unit_amount: unitAmount,
                         },
-                        unit_amount: Number(product.price) || Number(product.productPrice) * 100, 
-                    },
-                    quantity: Number(product.quantity) || 1,
-                }))
+                        quantity: Number(product.quantity) || 1,
+                    };
+                });
+                console.log("LineItems: ", LineItems)
                 const session = await stripe.checkout.sessions.create({
                     payment_method_types: ['card'],
                     line_items: LineItems,
