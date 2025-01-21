@@ -72,8 +72,6 @@ protectedroute.post('/UploadProducts', async (req:RequestWithUser, res: Response
           productSize,
           images
         }
-        console.log("data: ", sellerProducts)
-        console.log("userID: ", userId)
 
         const result = await User('seller').updateOne(
           { _id: userId },

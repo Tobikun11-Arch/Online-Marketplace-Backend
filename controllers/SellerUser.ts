@@ -37,18 +37,87 @@ export const Update_Product = async (req: Request, res: Response) => {
             images
         } = req.body
 
-        const user = await User('seller').findById(userId)
-        if(!user) {
-            return res.status(404).json({ message: "User not found" })
-        }
+        const update_userProduct = await User('seller').findOneAndUpdate(
+        {
+            _id: userId,
+            'sellerProducts._id': productId
+        }, {
+            $set: {
+                'sellerProducts.$': {
+                    productName,
+                    productDescription,
+                    productCategory,
+                    status,
+                    Sku,
+                    productPrice,
+                    productStock,
+                    productDiscount,
+                    productQuality,
+                    productSize,
+                    images,
+                    _id: productId 
+                }
+            }
+        }, {
+            new: true
+        })
 
-        if(user) {
-            const update_product = user.sellerProducts.findIndex(
-                productIndex => productIndex._id.toString() === productId
-            )
-
-            console.log("Product id match: ", update_product)
+        if(!update_userProduct) {
+            return res.status(404).json({ message: "User or Product not found" })
         }
+        return res.status(200).json({ message: "Update successfull" })
+    } catch (error) {
+        console.error("Error: ", error)
+    }
+}
+
+export const Update_DraftProduct = async (req: Request, res: Response) => {
+    try {
+        const {
+            userId,
+            productId,
+            productName,
+            productDescription,
+            productCategory,
+            status,
+            Sku,
+            productPrice,
+            productStock,
+            productDiscount,
+            productQuality,
+            productSize,
+            images
+        } = req.body
+
+        const update_userDraftProduct = await User('seller').findOneAndUpdate(
+        {
+            _id: userId,
+            'draftProducts.$': productId
+        }, {
+            $set: {
+                'draftProducts.$': {
+                    productName,
+                    productDescription,
+                    productCategory,
+                    status,
+                    Sku,
+                    productPrice,
+                    productStock,
+                    productDiscount,
+                    productQuality,
+                    productSize,
+                    images,
+                    _id: productId 
+                }
+            }
+        }, {
+            new: true
+        })
+
+        if(!update_userDraftProduct) {
+            return res.status(404).json({ message: "User or Product not found" })
+        }
+        return res.status(200).json({ message: "Update successfull" })
     } catch (error) {
         console.error("Error: ", error)
     }

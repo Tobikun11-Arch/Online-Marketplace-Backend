@@ -18,6 +18,7 @@ export interface ISellerProducts {
 }
 
 export interface IDraftProducts {
+    _id: Types.ObjectId;
     productName: string;
     publication_status: string;
     status: string;
