@@ -49,7 +49,7 @@ const Orderist = new Schema<OrderList>({
     buyer_lastName: { type: String, required: true },
     buyer_email: { type: String, required: true },
     buyer_username: { type: String, required: true },
-    product: { type: CartItemSchema, required: true }
+    product: { type: [CartItemSchema], required: true }
 })
 
 export const sellerSchema = new Schema<IUser>({
