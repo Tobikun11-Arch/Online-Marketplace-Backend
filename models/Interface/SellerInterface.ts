@@ -41,5 +41,5 @@ export interface OrderList {
     buyer_lastName: string;
     buyer_email: string;
     buyer_username: string;
-    product: ICartItem;
+    product: ICartItem[];
 }
