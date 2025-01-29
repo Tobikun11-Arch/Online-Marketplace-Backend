@@ -1,4 +1,5 @@
 import { Types } from 'mongoose';
+import { ICartItem } from './BuyerInterface';
 
 export interface ISellerProducts {
     _id: Types.ObjectId;
@@ -33,4 +34,12 @@ export interface IDraftProducts {
     images: string[]; 
     createdAt: Date;
     updatedAt: Date;
+}
+
+export interface OrderList {
+    buyer_firstName: string;
+    buyer_lastName: string;
+    buyer_email: string;
+    buyer_username: string;
+    product: ICartItem;
 }

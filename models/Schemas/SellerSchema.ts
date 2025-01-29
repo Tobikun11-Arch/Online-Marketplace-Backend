@@ -1,6 +1,16 @@
 import mongoose, { Schema } from 'mongoose';
-import { ISellerProducts, IDraftProducts } from '../Interface/SellerInterface'
+import { ISellerProducts, IDraftProducts, OrderList } from '../Interface/SellerInterface'
 import { IUser } from '../user'
+import { ICartItem } from '../Interface/BuyerInterface';
+
+export const CartItemSchema = new Schema<ICartItem>({
+    productId: { type: mongoose.Schema.Types.ObjectId, required: true },
+    productName: { type: String, required: true },
+    images: { type: [String], required: true },
+    quantity: { type: Number, required: true, default: 1 },
+    price: { type: Number, required: true },
+    addedAt: { type: Date, default: Date.now },
+});
 
 const SellerProducts = new Schema<ISellerProducts>({
     productName: { type: String, required: true },
@@ -34,6 +44,14 @@ const DraftProducts = new Schema<IDraftProducts>({
     updatedAt: { type: Date, default: Date.now }
 });
 
+const Orderist = new Schema<OrderList>({
+    buyer_firstName: { type: String, required: true },
+    buyer_lastName: { type: String, required: true },
+    buyer_email: { type: String, required: true },
+    buyer_username: { type: String, required: true },
+    product: { type: CartItemSchema, required: true }
+})
+
 export const sellerSchema = new Schema<IUser>({
     FirstName: { type: String, required: true },
     LastName: { type: String, required: true },
@@ -49,4 +67,5 @@ export const sellerSchema = new Schema<IUser>({
     refreshToken: { type: String },
     sellerProducts: { type: [SellerProducts], default: [] }, // Only for sellers
     draftProducts: { type: [DraftProducts], default: [] },
+    product_orders: { type: [Orderist], default: [] }
 }, { collection: 'Seller_Accounts', timestamps: true });

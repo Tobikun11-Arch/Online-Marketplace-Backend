@@ -52,7 +52,6 @@ export const SearchList = async (req: Request, res: Response) => {
 
 export const StripePayment = async (req: Request, res: Response) => {
     const { products, userId }: { products: product_types_stripe[]; userId: string } = req.body
-    console.log("Products: ", products)
     try {
         const user_exist = await User('buyer').findById(userId)
         if (!user_exist) {
@@ -61,7 +60,7 @@ export const StripePayment = async (req: Request, res: Response) => {
         if(user_exist) {
            if(products) { //if products exist
                 const productId = products.map((product) => product.productId || product._id)
-                console.log("Product id: ", productId)
+               
                 const LineItems = products.map((product) => {
                     // Use product.price if it exists, otherwise fall back to product.productPrice
                     const price = Number(product.price) || Number(product.productPrice);
@@ -108,6 +107,8 @@ export const Orders = async (req: Request, res: Response) => {
         if(user_exist) {
             if(cartProducts) {       
                 const product_Ids = Array.isArray(cartProducts) ? cartProducts : [cartProducts]
+
+                console.log("Product id: ", product_Ids)
                 const productCart = await User('buyer').findOne(
                     {
                         _id: userId,
@@ -118,6 +119,7 @@ export const Orders = async (req: Request, res: Response) => {
                         }
                     }
                 )
+               
 
                 const products = await Product.findOne(
                     {
@@ -125,7 +127,7 @@ export const Orders = async (req: Request, res: Response) => {
                     }
                 )
 
-                if (productCart && productCart.cart.length > 0 ) {
+                if (productCart && productCart.cart.length > 0 ) { //for buying from cart
                     const newOrder = productCart?.cart.map(cart => ({
                         productId: cart.productId,
                         productName: cart.productName,
@@ -134,7 +136,51 @@ export const Orders = async (req: Request, res: Response) => {
                         price: cart.price
                     }))
 
-                    const totalAmount = newOrder.reduce((sum, item) => sum + item.price * item.quantity, 0);
+                     //Start test           
+                    const test_id =  [ '678f72497e911ffa2d947240' ]  
+
+                    const buyer_information = await User('buyer').findOne({_id: userId}) 
+                    console.log("buyer info: ", buyer_information) //buyer info
+
+                    if(!buyer_information) {
+                        return res.status(404).json({ message: "Buyer not found" })
+                    }
+
+                    console.log("Order 1: ", newOrder) //order details
+
+
+                    const search_id_seller = await User('seller').findOne({ //change the test id later for actual id, if i already refactor the fetch in frontend
+                        sellerProducts: {
+                            $elemMatch: {
+                                _id: { $in: test_id }
+                            }
+                        }
+                    }) 
+
+                    if(!search_id_seller) {
+                        return res.status(404).json({ message: "Product not found" })
+                    }
+
+                    const add_on_orderlist = await User('seller').updateOne({  _id: search_id_seller._id }, {
+                        $push: {
+                            product_orders: {
+                                buyer_firstName: buyer_information.FirstName,
+                                buyer_lastName: buyer_information.LastName,
+                                buyer_email: buyer_information.Email,
+                                buyer_username: buyer_information.Username,
+                                product: newOrder
+                            }
+                        }
+                    })
+
+                    if(add_on_orderlist.modifiedCount > 0) {
+                        console.log("Order list updated")
+                    } else {
+                        console.log("Order list not updated")
+                    }
+                    //End test
+
+                    const totalAmount = newOrder.reduce((sum, item) => sum + Number(item.price) * Number(item.quantity), 0);
                     const order = {
                         orderId: new Types.ObjectId(),
                         items: newOrder,
@@ -165,14 +211,43 @@ export const Orders = async (req: Request, res: Response) => {
                     if(remove_cart.modifiedCount > 0 && add_order.modifiedCount > 0) {
                         return res.status(200).json({ message: "Update success" })
                     }
-                } else {
+                } else { //direct buy
                     const Items = {
                         productId: products?._id,
                         productName: products?.productName,
                         images: products?.images,
-                        quantity: products?.productQuantity,
+                        quantity: 1,
                         price: products?.productPrice
                     }
+
+                       //Start test           
+                       const test_id =  [ '678f72497e911ffa2d947240' ] //product_id i want to find in sellerproducts in seller
+                       //sending product details to seller sellerproducts[]
+                       const buyer_information = await User('buyer').findOne({_id: userId})
+                       console.log("buyer info: ", buyer_information)
+                       
+   
+                       const search_id_seller = await User('seller').findOne({ //change the test id later for actual id, if i already refactor the fetch in frontend
+                           sellerProducts: {
+                               $elemMatch: {
+                                   _id: { $in: test_id }
+                               }
+                           }
+                       }) 
+   
+                       if(!search_id_seller) {
+                           return res.status(404).json({ message: "Product not found" })
+                       }
+   
+                       const matchingProducts = search_id_seller.sellerProducts.filter(product => 
+                           test_id.includes(product._id.toString())
+                       );
+   
+                       console.log("quantity: 1")
+                       
+                       console.log("Found: ", matchingProducts);
+                       //End test
+   
 
                     const order = {
                         orderId: new Types.ObjectId(),
@@ -181,6 +256,8 @@ export const Orders = async (req: Request, res: Response) => {
                         status: 'purchased', 
                         createdAt: new Date(),
                     }
+
+                    console.log("Order 2: ", order)
 
                     const add_order = await User('buyer').updateOne(
                         {

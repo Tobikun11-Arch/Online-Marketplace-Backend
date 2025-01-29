@@ -1,7 +1,7 @@
 import mongoose, { Document, Model, Types } from 'mongoose';
 import bcrypt from 'bcrypt';
 import { IOrder, ICartItem } from './Interface/BuyerInterface'
-import { ISellerProducts, IDraftProducts } from './Interface/SellerInterface'
+import { ISellerProducts, IDraftProducts, OrderList } from './Interface/SellerInterface'
 import { buyerSchema } from './Schemas/BuyerSchema'
 import { sellerSchema } from './Schemas/SellerSchema'
 
@@ -20,10 +20,15 @@ export interface IUser extends Document {
     emailToken?: string;
     refreshToken?: string;
     comparePassword: (candidatePassword: string) => Promise<boolean>;
+
+    //buyer
     cart: ICartItem[];
     orders: IOrder[];
+
+    //seller
     sellerProducts: ISellerProducts[]
     draftProducts: IDraftProducts[]
+    product_orders: OrderList[]
 }
 
 
