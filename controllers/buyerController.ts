@@ -7,10 +7,21 @@ import { Types } from 'mongoose'
 
 export const ProductList = async (req: Request, res: Response) => {
     try {
-        const MainShopProducts = await MainShop.find({})
         const SellerProducts = await Product.find({})
-        const TrendingProducts = await TrendingProduct.find({})
-        return res.json({ MainShopProducts, SellerProducts, TrendingProducts })
+
+        //console 3 data to check their structure 
+        // console.log(MainShopProducts)
+
+        //Fetching trending products
+        const order_products = await User('seller').find({}).select('product_orders')
+        const trend_products = order_products.flatMap(seller => seller.product_orders.flatMap(trends => trends.product.filter(product => product.quantity > 3))).slice(0, 3)
+
+        //new structure testing
+        const product = await User('seller').find({}).select('sellerProducts')
+        const seller_products = product.flatMap(seller => seller.sellerProducts)
+        const sorted_products = seller_products.sort((a, b)=> b.createdAt.getTime() - a.createdAt.getTime()).slice(0,3)
+
+        return res.json({ MainShopProducts: sorted_products, SellerProducts, TrendingProducts: trend_products, seller_products })
     } catch (error) {
         console.error(error)
         return res.json({ error })
@@ -156,54 +167,44 @@ export const Cart = async (req: Request, res: Response) => { //Add to cart
 export const ProductId = async(req: Request, res: Response) => {
     const productId = req.params.id
     try {
-        const product = await Product.findById(productId)
-        const mainproduct = await MainShop.findById(productId)
-        const trendingproduct = await TrendingProduct.findById(productId)
-        let similar: any = []
+        //New structure for new fetch data from seller_products[]
+        const products = await User('seller').find({}).select('sellerProducts')
+        const allProducts = products.flatMap(seller => seller.sellerProducts);
+        const specificProduct = allProducts.find(product => product._id.toString() === productId);
 
-        if(product?.productCategory || mainproduct?.productCategory || trendingproduct?.productCategory) {
-            const category = product?.productCategory || mainproduct?.productCategory || trendingproduct?.productCategory
-            const similarproducts = await Product.find({ 
-                productCategory: category,
-                _id: { $ne: productId }
-            })
-
-            const similarmainshop = await MainShop.find({ 
-                productCategory: category,
-                _id: { $ne: productId }
-            })
-
-            const trendingproducts = await TrendingProduct.find({ 
-                productCategory: category,
-                _id: { $ne: productId }
-            })
-
-            similar = [...similarproducts, ...similarmainshop, ...trendingproducts]
+        if(!specificProduct) {
+            return res.status(404).json({ message: "No product found" })
         }
+        const similar_products = allProducts.filter(product => product.productCategory == specificProduct.productCategory)
+        const sorted_products = allProducts.sort((a, b)=> b.createdAt.getTime() - a.createdAt.getTime()).slice(0,3)
 
-        if (product || mainproduct || trendingproduct) {
-            return res.json({ product: product || null, trendingproduct: trendingproduct || null, mainproduct: mainproduct || null, similar: similar || [] });
-        } else {
-            return res.json({ error: 'no product found!' })
-        }
+        return res.status(200).json({ similar: similar_products || [], product: specificProduct || [], mainproduct: sorted_products })
     } catch (error) {
         console.error(error)
+        return res.status(500).json({ message: "Error getting specific data and similar products" })
     }
 }
 
 export const CategoryLength = async(req: Request, res: Response) => {
     try {
         const categories = ['Fashion', 'Electronics', 'Home & Kitchen', 'Automotive']
-        const results: Record<string, any[]> = {}
 
-        for (const category of categories) {
-            const productCategory = await Product.find({ productCategory: category })
-            results[category] = productCategory
+        //New structure
+        const newResults: Record<string, any[]> = {}
+
+       //Implementing new code blocks
+       for (const category of categories) {
+            const newCategory = await User('seller').find({}).select('sellerProducts')
+            const product_length = newCategory.flatMap(seller_category => seller_category.sellerProducts)
+            const found_category = product_length.filter(product => product.productCategory == category)
+            newResults[category] = found_category ? found_category : []
         }
+    
+        console.log("Results: ", newResults)
 
-        res.status(200).json({
+        return res.status(200).json({
             message: "category get successful",
-            categories: results
+            categories: newResults
         })
     } catch (error) {
         return res.status(500).json({
