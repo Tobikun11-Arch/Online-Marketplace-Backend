@@ -1,30 +1,27 @@
 import { Request, Response } from 'express';
-import MainShop from "../models/MainShop";
-import Product from '../models/product';
-import TrendingProduct from '../models/TrendingProduct';
 import User from '../models/user';
 import { Types } from 'mongoose'
 
 export const ProductList = async (req: Request, res: Response) => {
     try {
-        const SellerProducts = await Product.find({})
-
-        //console 3 data to check their structure 
-        // console.log(MainShopProducts)
-
-        //Fetching trending products
+        //most sold products in one go
         const order_products = await User('seller').find({}).select('product_orders')
         const trend_products = order_products.flatMap(seller => seller.product_orders.flatMap(trends => trends.product.filter(product => product.quantity > 3))).slice(0, 3)
 
-        //new structure testing
+        //Newest upload for my home page
         const product = await User('seller').find({}).select('sellerProducts')
-        const seller_products = product.flatMap(seller => seller.sellerProducts)
+        const seller_products = product.flatMap(seller => seller.sellerProducts) //all products in all seller
         const sorted_products = seller_products.sort((a, b)=> b.createdAt.getTime() - a.createdAt.getTime()).slice(0,3)
 
-        return res.json({ MainShopProducts: sorted_products, SellerProducts, TrendingProducts: trend_products, seller_products })
+        //Sorted data for most sold products that over 20 quantity and pass 20 data only
+        const popular_products = order_products.flatMap(seller => seller.product_orders.flatMap(trends => trends.product.filter(product => product.quantity >= 20))).slice(0, 20)
+
+        console.log("popular_products: ", popular_products)
+
+        return res.json({ MainShopProducts: sorted_products, TrendingProducts: trend_products, seller_products, popular_products })
     } catch (error) {
         console.error(error)
-        return res.json({ error })
+        return res.status(500).json({ error: 'Internal Server Error' })
     }
 }
 
@@ -52,6 +49,8 @@ export const updateQuantity = async (req: Request, res: Response) => {  //Update
     if(!userId || !productId) {
         return res.status(400).json({ error: 'UserId, ProductId are required' });
     }
+
+    console.log({userId, productId, quantity})
 
     try {
         const user = await User('buyer').findById(userId);
@@ -112,32 +111,21 @@ export const Cart = async (req: Request, res: Response) => { //Add to cart
     }
 
     try {
-        const product = await Product.findById(productId);
-        const mainproduct = await MainShop.findById(productId);
-        const trendingproduct = await TrendingProduct.findById(productId);
+        //New structure
+        const seller_product = await User('seller').find({}).select('sellerProducts')
+        const filtered_product = seller_product.flatMap(seller => seller.sellerProducts)
+        const cart_products = filtered_product.find(product => product._id.toString() === productId)
 
-        // Ensure productID is valid
-        const productID = product?._id || mainproduct?._id || trendingproduct?._id;
-
-        if (!productID) {
-            return res.status(404).json({ error: 'Product not found in any collection' });
-        }
-
-        const price =
-            product?.productPrice ||
-            mainproduct?.productPrice ||
-            trendingproduct?.productPrice;
-
-        if (!price) {
-            return res.status(400).json({ error: 'Product price not available' });
+        if(!cart_products) {
+            return res.status(404).json({ error: 'Product not found' })
         }
 
         const cartItem = {
-            productId: productID as Types.ObjectId,
+            productId: cart_products?._id as Types.ObjectId,
             productName,
             images,
             quantity,
-            price: parseFloat(price),
+            price: cart_products.productPrice,
             addedAt: new Date(),
         };
 
@@ -147,7 +135,7 @@ export const Cart = async (req: Request, res: Response) => { //Add to cart
         }
 
         const existingItemIndex = user.cart.findIndex(
-            (item) => item.productId.toString() === productID.toString()
+            (item) => item.productId.toString() === cart_products?._id.toString()
         );
 
         if (existingItemIndex > -1) {
@@ -167,7 +155,6 @@ export const Cart = async (req: Request, res: Response) => { //Add to cart
 export const ProductId = async(req: Request, res: Response) => {
     const productId = req.params.id
     try {
-        //New structure for new fetch data from seller_products[]
         const products = await User('seller').find({}).select('sellerProducts')
         const allProducts = products.flatMap(seller => seller.sellerProducts);
         const specificProduct = allProducts.find(product => product._id.toString() === productId);
@@ -199,8 +186,6 @@ export const CategoryLength = async(req: Request, res: Response) => {
             const found_category = product_length.filter(product => product.productCategory == category)
             newResults[category] = found_category ? found_category : []
         }
-    
-        console.log("Results: ", newResults)
 
         return res.status(200).json({
             message: "category get successful",

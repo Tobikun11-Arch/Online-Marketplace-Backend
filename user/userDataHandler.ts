@@ -52,6 +52,7 @@ export const SearchList = async (req: Request, res: Response) => {
 
 export const StripePayment = async (req: Request, res: Response) => {
     const { products, userId }: { products: product_types_stripe[]; userId: string } = req.body
+
     try {
         const user_exist = await User('buyer').findById(userId)
         if (!user_exist) {
@@ -124,11 +125,18 @@ export const Orders = async (req: Request, res: Response) => {
             }
         ).session(session)
 
-        const products = await Product.findOne(
+        const products = await User('seller').findOne(
             {
-                _id: cartProducts
+                sellerProducts: {
+                    $elemMatch: {
+                        _id: { $in: product_Ids }
+                }
             }
-        ).session(session)
+        }).session(session)
+
+        const filteredProducts = products?.sellerProducts.filter(product => 
+            product_Ids.includes(product._id.toString())
+        );
 
         if (productCart && productCart.cart.length > 0 ) { //for buying from cart
             const newOrder = productCart?.cart.map(cart => ({
@@ -139,10 +147,6 @@ export const Orders = async (req: Request, res: Response) => {
                 price: cart.price
             }))
 
-
-            //Start test... Refactor this later           
-            const test_id =  [ '678f72497e911ffa2d947240' ]  //change the test id later for actual id, if i already refactor the fetch in frontend
-
             const buyer_information = await User('buyer').findOne({_id: userId}) //buyer info
             if(!buyer_information) {
                 await session.abortTransaction()
@@ -150,11 +154,10 @@ export const Orders = async (req: Request, res: Response) => {
                 return res.status(404).json({ message: "Buyer not found" })
             }
 
-            //searching whos seller for that product, i use product Id to find the seller, it uses test id because i dont have the actual id yet coming from frontend
             const search_id_seller = await User('seller').findOne({ 
                 sellerProducts: {
                     $elemMatch: {
-                        _id: { $in: test_id }
+                        _id: { $in: product_Ids }
                     }
                 }
             }).session(session)
@@ -220,16 +223,15 @@ export const Orders = async (req: Request, res: Response) => {
                 return res.status(400).json({ message: "Failed to update" })
             }
         } else { //direct buy
-            const Items = {
-                productId: products?._id,
-                productName: products?.productName,
-                images: products?.images,
+            const Items = filteredProducts?.map(product => ({
+                productId: product._id,
+                productName: product.productName,
+                images: product.images,
                 quantity: 1,
-                price: products?.productPrice
-            }
+                price: product.productPrice
+            }))
 
-                //Start test... Refactor this later           
-            const test_id =  [ '678f72497e911ffa2d947240' ]  //change the test id later for actual id, if i already refactor the fetch in frontend
+            console.log("Direct buy: ", Items)
 
             const buyer_information = await User('buyer').findOne({_id: userId}).session(session) //buyer info
             if(!buyer_information) {
@@ -242,7 +244,7 @@ export const Orders = async (req: Request, res: Response) => {
             const search_id_seller = await User('seller').findOne({ 
                 sellerProducts: {
                     $elemMatch: {
-                        _id: { $in: test_id }
+                        _id: { $in: product_Ids }
                     }
                 }
             }).session(session)
@@ -265,7 +267,6 @@ export const Orders = async (req: Request, res: Response) => {
                     }
                 }
             }, { session })
-            //End test
 
             const order = {
                 orderId: new Types.ObjectId(),
