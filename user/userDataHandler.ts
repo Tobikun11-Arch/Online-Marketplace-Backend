@@ -118,7 +118,7 @@ export const Orders = async (req: Request, res: Response) => {
             {
                 _id: userId,
                 cart: {
-                    $elemMatch: {
+                     $elemMatch: {
                         productId: { $in: product_Ids }
                     }
                 }
@@ -130,9 +130,10 @@ export const Orders = async (req: Request, res: Response) => {
                 sellerProducts: {
                     $elemMatch: {
                         _id: { $in: product_Ids }
+                    }
                 }
             }
-        }).session(session)
+        ).session(session)
 
         const filteredProducts = products?.sellerProducts.filter(product => 
             product_Ids.includes(product._id.toString())
@@ -154,13 +155,9 @@ export const Orders = async (req: Request, res: Response) => {
                 return res.status(404).json({ message: "Buyer not found" })
             }
 
-            const search_id_seller = await User('seller').findOne({ 
-                sellerProducts: {
-                    $elemMatch: {
-                        _id: { $in: product_Ids }
-                    }
-                }
-            }).session(session)
+            const search_id_seller = await User('seller').findOne({
+                "sellerProducts._id": { $all: product_Ids } // Ensures all products match
+            }).session(session);
 
             if(!search_id_seller) {
                 await session.abortTransaction();

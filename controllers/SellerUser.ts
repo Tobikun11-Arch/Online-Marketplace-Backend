@@ -9,12 +9,31 @@ export const Get_Product = async (req: Request, res: Response) => {
             if(!user) { 
                 return res.status(404).json({ message: "user not found"}) 
             }
+
+            //since in my seller, the product was in nested array, I had to use flatMap to get all the products
+            const allProducts = user.product_orders?.flatMap(order => order.product)
+
+            //reduce to iterate the flat nested product [] and get the total quantity of each product
+            const productQuantities = allProducts.reduce((acc, product) => {
+                if (!acc[product.productId.toString()]) {
+                  acc[product.productId.toString()] = 0;    
+                }
+                acc[product.productId.toString()] += product.quantity;
+                return acc; 
+            }, {} as Record<string, number>);
+              
+              //Convert the result to the desired format (optional)
+            const result = Object.entries(productQuantities).map(([productId, quantity]) => ({
+                productId,
+                totalQuantity: quantity,
+            }));
+
             const products = [...user.sellerProducts, ...user.draftProducts]
-            return res.status(200).json({ user_data: products })
+            return res.status(200).json({ user_data: products, productQuantities: result })
         } else {
             const user = await User('seller').findOne(
                 { _id: userId },
-                {   
+                {
                     draftProducts: { $elemMatch: { _id:  productId } },
                     sellerProducts: { $elemMatch: { _id:  productId } }
                 }
