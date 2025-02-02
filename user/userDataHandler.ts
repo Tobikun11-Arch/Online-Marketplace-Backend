@@ -147,6 +147,16 @@ export const Orders = async (req: Request, res: Response) => {
                 quantity: cart.quantity,
                 price: cart.price
             }))
+            
+            for (const item of newOrder) {
+                await User('seller').findOneAndUpdate(
+                    { 'sellerProducts._id': item.productId },
+                    { 
+                        $inc: { 'sellerProducts.$.productStock': -item.quantity }  // Subtract the exact quantity
+                    },
+                    { new: true, session }
+                );
+            }
 
             const buyer_information = await User('buyer').findOne({_id: userId}) //buyer info
             if(!buyer_information) {
@@ -228,7 +238,20 @@ export const Orders = async (req: Request, res: Response) => {
                 price: product.productPrice
             }))
 
-            console.log("Direct buy: ", Items)
+            const product_items = filteredProducts ? filteredProducts.map(product => ({
+                productId: product._id,
+                productStock: product.productStock
+            })) : [];
+            
+            const productIds = product_items?.map(item => item.productId);
+            
+            const products = await User('seller').findOneAndUpdate(
+                { 'sellerProducts._id': { $in: productIds } }, 
+                { 
+                    $inc: { 'sellerProducts.$.productStock': -1 } 
+                },
+                { new: true, session }
+            );
 
             const buyer_information = await User('buyer').findOne({_id: userId}).session(session) //buyer info
             if(!buyer_information) {
