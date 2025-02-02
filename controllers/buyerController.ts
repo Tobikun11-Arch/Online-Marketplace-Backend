@@ -125,7 +125,7 @@ export const Cart = async (req: Request, res: Response) => { //Add to cart
             productName,
             images,
             quantity,
-            price: cart_products.productPrice,
+            price: cart_products.productPrice - (cart_products.productPrice * (cart_products.productDiscount / 100)),
             addedAt: new Date(),
         };
 

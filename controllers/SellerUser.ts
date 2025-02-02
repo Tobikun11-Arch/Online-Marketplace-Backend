@@ -52,6 +52,32 @@ export const Get_Product = async (req: Request, res: Response) => {
     }
 }
 
+export const orders_page = async (req: Request, res: Response) => {
+    const { userId } = req.query 
+
+    try {
+        const user = await User('seller').findById(userId)
+
+        if(!user) {
+            return res.status(404).json({ message: "User not found!" })
+        }
+
+        const orders_product = await User('seller').findOne(
+            {_id: userId},
+            { product_orders: 1 }
+        )
+
+        const order_products = orders_product?.product_orders.flatMap(product=> product.product)
+        console.log("data: ", order_products)
+
+        return res.status(200).json({ product_orders: order_products })
+
+    } catch (error) {
+        console.error("Error ", error)
+        return res.status(500).json({ message: "Internal server error" })
+    }
+}
+
 export const Update_Product = async (req: Request, res: Response) => {
     try {
         const {

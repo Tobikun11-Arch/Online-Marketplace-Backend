@@ -145,7 +145,7 @@ export const Orders = async (req: Request, res: Response) => {
                 productName: cart.productName,
                 images: cart.images,
                 quantity: cart.quantity,
-                price: cart.price
+                price: cart.price,
             }))
             
             for (const item of newOrder) {
