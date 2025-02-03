@@ -68,9 +68,30 @@ export const orders_page = async (req: Request, res: Response) => {
         )
 
         const order_products = orders_product?.product_orders.flatMap(product=> product.product)
-        console.log("data: ", order_products)
 
-        return res.status(200).json({ product_orders: order_products })
+        const customer_info = orders_product?.product_orders.map(buyer => ({
+            buyer_firstName: buyer.buyer_firstName,
+            buyer_lastName: buyer.buyer_lastName,
+            buyer_email: buyer.buyer_email,
+            buyer_username: buyer.buyer_username,
+        }));
+        
+        // Count occurrences of each email
+        const purchaseCountMap = new Map();
+        
+        orders_product?.product_orders.forEach(buyer => {
+            purchaseCountMap.set(buyer.buyer_email, (purchaseCountMap.get(buyer.buyer_email) || 0) + 1);
+        });
+        
+        // Filter unique customers and add total purchases
+        const customer_list = customer_info?.filter((word, index, self) =>
+            index === self.findIndex(w => word.buyer_email === w.buyer_email)
+        ).map(buyer => ({
+            ...buyer,
+            total_purchases: purchaseCountMap.get(buyer.buyer_email) || 0
+        }));
+
+        return res.status(200).json({ product_orders: order_products, buyer_info: customer_list })
 
     } catch (error) {
         console.error("Error ", error)
