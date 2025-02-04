@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { Register, Login, CheckUser } from "../controllers/userController";
 import { ProductList, ProductId, CategoryLength, Cart, CartProducts, updateQuantity, deleteProduct, UpdateProfile } from "../controllers/buyerController";
-import { Get_Product, Update_Product, Update_DraftProduct, Draft_Publish, DeleteProduct, orders_page, SellerData } from "../controllers/SellerUser";
+import { Get_Product, Update_Product, Update_DraftProduct, Draft_Publish, DeleteProduct, orders_page, SellerData, UpdateSeller } from "../controllers/SellerUser";
 import { SearchList, StripePayment, Orders, getOrderHistory } from "../user/userDataHandler"
 import { authenticateToken } from "../middleware/AuthenticateAccessToken";
 import protectedroute from "./protectedRoutes";
@@ -25,6 +25,7 @@ router.put('/put/draftproduct', Update_DraftProduct)
 router.put('/Orders', Orders)
 router.put('/product/updateQuantity', updateQuantity)
 router.put('/UpdateProfile', UpdateProfile)
+router.put('/seller_profile', UpdateSeller)
 router.put('/searchProduct', SearchList)
 
 //Get request

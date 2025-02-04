@@ -328,3 +328,33 @@ export const SellerData = async (req: Request, res: Response) => {
         return res.status(500).json({ error: "Internal server error" })
     }
 }
+
+export const UpdateSeller = async(req: Request, res: Response) => {
+    const { userId, FirstName, LastName, PhoneNumber, PetName, Email, Username } = req.body;
+
+    try {
+        const modifiedData = await User('seller').updateOne(
+            { _id: userId },
+            {
+                $set: {
+                    FirstName: FirstName,
+                    LastName: LastName,
+                    PhoneNumber: PhoneNumber,
+                    PetName: PetName,
+                    Email: Email,
+                    Username: Username,
+                    updatedAt: new Date()
+                }
+            }
+        )
+        if(modifiedData.modifiedCount > 0) {
+            return res.status(200).json({ message: "Update successfully" })
+        } else{
+            return res.status(404).json({ message: "user not found" })
+        }
+    } 
+    catch (error) {
+        console.error("Failed to update: ", error)
+        return res.status(500).json({ error: "Internal server error" })
+    }
+}
