@@ -292,3 +292,39 @@ export const DeleteProduct = async (req: Request, res: Response) => {
         return res.status(500).json({ message: "Internal server error" })
     }
 }
+
+export const SellerData = async (req: Request, res: Response) => {
+    /**Products : sellerproducts count
+    Ordered: products count on product orders
+    Buyer: Buyer counts  */
+
+    try {
+    const { userId } = req.query
+        
+        const user = await User('seller').findById(userId)
+        if(!user) {
+            return res.status(404).json({ message: "User not found" })
+        }
+
+        const buyer_info = user.product_orders.map((buyer)=> ({
+            email: buyer.buyer_email
+        }))
+
+        const products_count = user.sellerProducts.length //products count
+        const order_count = user.product_orders.length //orders count
+        const buyer_count = buyer_info?.filter((word, index, self) => //buyers count
+            index === self.findIndex(w => word.email === w.email)
+        ).length
+
+        const data = {
+            productcount: products_count,
+            ordercount: order_count,
+            buyercount: buyer_count
+        }
+        
+        return res.status(200).json({ seller_data: [data] })
+    } catch (error) {
+        console.error("Error requesting data: ", error)
+        return res.status(500).json({ error: "Internal server error" })
+    }
+}
