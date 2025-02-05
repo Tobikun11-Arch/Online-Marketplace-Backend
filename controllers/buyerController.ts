@@ -16,8 +16,6 @@ export const ProductList = async (req: Request, res: Response) => {
         //Sorted data for most sold products that over 20 quantity and pass 20 data only
         const popular_products = order_products.flatMap(seller => seller.product_orders.flatMap(trends => trends.product.filter(product => product.quantity >= 20))).slice(0, 20)
 
-        console.log("popular_products: ", popular_products)
-
         return res.json({ MainShopProducts: sorted_products, TrendingProducts: trend_products, seller_products, popular_products })
     } catch (error) {
         console.error(error)
@@ -169,32 +167,6 @@ export const ProductId = async(req: Request, res: Response) => {
     } catch (error) {
         console.error(error)
         return res.status(500).json({ message: "Error getting specific data and similar products" })
-    }
-}
-
-export const CategoryLength = async(req: Request, res: Response) => {
-    try {
-        const categories = ['Fashion', 'Electronics', 'Home & Kitchen', 'Automotive']
-
-        //New structure
-        const newResults: Record<string, any[]> = {}
-
-       //Implementing new code blocks
-       for (const category of categories) {
-            const newCategory = await User('seller').find({}).select('sellerProducts')
-            const product_length = newCategory.flatMap(seller_category => seller_category.sellerProducts)
-            const found_category = product_length.filter(product => product.productCategory == category)
-            newResults[category] = found_category ? found_category : []
-        }
-
-        return res.status(200).json({
-            message: "category get successful",
-            categories: newResults
-        })
-    } catch (error) {
-        return res.status(500).json({
-            message: 'an error occured while fetching'
-        })
     }
 }
 
