@@ -299,7 +299,7 @@ export const SellerData = async (req: Request, res: Response) => {
     Buyer: Buyer counts  */
 
     try {
-    const { userId } = req.query
+        const { userId } = req.query
         
         const user = await User('seller').findById(userId)
         if(!user) {

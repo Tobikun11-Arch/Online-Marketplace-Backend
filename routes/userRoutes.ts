@@ -3,7 +3,7 @@ import { Register, Login, CheckUser } from "../controllers/userController";
 import { ProductList, ProductId, Cart, CartProducts, updateQuantity, deleteProduct, UpdateProfile } from "../controllers/buyerController";
 import { Get_Product, Update_Product, Update_DraftProduct, Draft_Publish, DeleteProduct, orders_page, SellerData, UpdateSeller } from "../controllers/SellerUser";
 import { SearchList, StripePayment, Orders, getOrderHistory } from "../user/userDataHandler"
-import { Categories } from '../controllers/ProductData'
+import { Categories, UserSales } from '../controllers/ProductData'
 import { authenticateToken } from "../middleware/AuthenticateAccessToken";
 import protectedroute from "./protectedRoutes";
 
@@ -37,6 +37,7 @@ router.get('/get/product', Get_Product)
 router.get('/get/orders', orders_page)
 router.get('/sellerdata', SellerData)
 router.get('/categories/length', Categories)
+router.get('/products/sales', UserSales)
 
 //Delete request
 router.delete('/delete/product', DeleteProduct)
