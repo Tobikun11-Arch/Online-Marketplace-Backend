@@ -94,7 +94,8 @@ export const UserSales = async(req: Request, res: Response) => {
             productName: product.productName,
             AddedAt: new Date(product.addedAt),
             productQuantity: product.quantity,
-            productPrice: product.price
+            productPrice: product.price,
+            productImage: product.images[0]
         })))
         .sort((a, b)=> b.AddedAt.getTime() - a.AddedAt.getTime())
 
