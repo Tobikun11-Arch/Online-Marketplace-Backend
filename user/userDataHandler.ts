@@ -84,8 +84,8 @@ export const StripePayment = async (req: Request, res: Response) => {
                     payment_method_types: ['card'],
                     line_items: LineItems,
                     mode: 'payment',
-                    success_url: `http://localhost:3000/payment/success/${userId}?ids=${encodeURIComponent(JSON.stringify(productId))}`,
-                    cancel_url: 'http://localhost:3000/payment/cancelled',
+                    success_url: `https://sajuu-bazaar.vercel.app/payment/success/${userId}?ids=${encodeURIComponent(JSON.stringify(productId))}`,
+                    cancel_url: 'https://sajuu-bazaar.vercel.app/payment/cancelled',
                 })
                 if(session) {
                     console.log("session working")
