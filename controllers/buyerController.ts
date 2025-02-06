@@ -16,6 +16,8 @@ export const ProductList = async (req: Request, res: Response) => {
         //Sorted data for most sold products that over 20 quantity and pass 20 data only
         const popular_products = order_products.flatMap(seller => seller.product_orders.flatMap(trends => trends.product.filter(product => product.quantity >= 20))).slice(0, 20)
 
+        console.log("popular_products: ", popular_products)
+
         return res.json({ MainShopProducts: sorted_products, TrendingProducts: trend_products, seller_products, popular_products })
     } catch (error) {
         console.error(error)
