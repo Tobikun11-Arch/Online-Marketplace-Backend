@@ -6,7 +6,7 @@ export const ProductList = async (req: Request, res: Response) => {
     try {
         //most sold products in one go
         const order_products = await User('seller').find({}).select('product_orders')
-        const trend_products = order_products.flatMap(seller => seller.product_orders.flatMap(trends => trends.product.filter(product => product.quantity > 3))).slice(0, 3)
+        const trend_products = order_products.flatMap(seller => seller.product_orders.flatMap(trends => trends.product.filter(product => product.quantity > 3))).slice(0, 4)
 
         //Newest upload for my home page
         const product = await User('seller').find({}).select('sellerProducts')
