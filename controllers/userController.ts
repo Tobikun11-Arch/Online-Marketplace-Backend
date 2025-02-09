@@ -42,7 +42,7 @@ export const Register = async (req: Request, res: Response) => {
       if(FirstName === "First Name") {
         const emailToken = crypto.randomBytes(64).toString('hex');
         await sendMail(lowerCaseEmail, emailToken)
-        const newUsers = new newUser({ FirstName, LastName, PhoneNumber, PetName, Email: lowerCaseEmail, Password: HashPassword, Role, Username, emailToken });
+        const newUsers = new newUser({ FirstName, LastName, PhoneNumber, PetName, Email: lowerCaseEmail, Password: HashPassword, Role, Username, emailToken, refreshToken: "rabdintkn" });
         await newUsers.save();
         res.status(201).json({
           success: true,
