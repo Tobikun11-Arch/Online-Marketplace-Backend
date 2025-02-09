@@ -42,7 +42,7 @@ export const Register = async (req: Request, res: Response) => {
       if(FirstName === "First Name") {
         const emailToken = crypto.randomBytes(64).toString('hex');
         await sendMail(lowerCaseEmail, emailToken)
-        const newUsers = new newUser({ FirstName, LastName, PhoneNumber, PetName, Email: lowerCaseEmail, Password: HashPassword, Role, Username, emailToken, refreshToken: "rabdintkn" });
+        const newUsers = new newUser({ FirstName, LastName, PhoneNumber, PetName, Email: lowerCaseEmail, Password: HashPassword, Role, Username, emailToken });
         await newUsers.save();
         res.status(201).json({
           success: true,
@@ -81,18 +81,18 @@ export const Login = async (req: Request, res: Response) => {
       const { accessToken, refreshToken } = GenerateTokens(user._id.toString());
 
       res.cookie('refreshToken', refreshToken, {
-        httpOnly: true,
-        secure: true,
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-        sameSite: 'none',
-    });
+          httpOnly: true,
+          secure: true,
+          maxAge: 7 * 24 * 60 * 60 * 1000,
+          sameSite: 'none',
+      });
 
-    res.cookie('accessToken', accessToken, {
-        httpOnly: true,
-        secure: true,
-        maxAge: 2 * 60 * 60 * 1000,
-        sameSite: 'none',
-    });
+      res.cookie('accessToken', accessToken, {
+          httpOnly: true,
+          secure: true,
+          maxAge: 2 * 60 * 60 * 1000,
+          sameSite: 'none',
+      });
 
       user.refreshToken = refreshToken
       await user.save();
