@@ -40,7 +40,10 @@ router.get('/categories/length', Categories)
 router.get('/products/sales', UserSales)
 
 //Delete request
+//seller product
 router.delete('/delete/product', DeleteProduct)
+
+//buyer product
 router.delete('/product/deleteProduct', deleteProduct)
 
 
